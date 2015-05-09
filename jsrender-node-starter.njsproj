@@ -19,7 +19,7 @@
     <OutputPath>.</OutputPath>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <ProjectTypeGuids>{3AF33F2E-1136-4D97-BBB7-1795711AC8B8};{349c5851-65df-11da-9384-00065b846f21};{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}</ProjectTypeGuids>
-    <ProjectView>ShowAllFiles</ProjectView>
+    <ProjectView>ProjectFiles</ProjectView>
     <NodejsPort>1337</NodejsPort>
     <StartWebBrowser>true</StartWebBrowser>
   </PropertyGroup>
@@ -30,15 +30,32 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="hapi.js" />
     <Compile Include="index.js" />
+    <Compile Include="lib\jsrender.js" />
+    <Compile Include="public\js\clientapp.js" />
     <Content Include=".gitignore" />
     <Content Include="app.json" />
+    <Content Include="public\data\movies.json" />
     <Content Include="package.json" />
-    <Content Include="public\node.svg" />
+    <Content Include="Procfile" />
+    <Content Include="public\images\logo-jsv.png" />
+    <Content Include="public\styles\style.css" />
     <Content Include="README.md" />
+    <Content Include="templates\hello-world.html" />
+    <Content Include="templates\layout.html" />
+    <Content Include="templates\movie-detail.html" />
+    <Content Include="templates\movie-language.html" />
+    <Content Include="templates\movie-list.html" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="lib\" />
     <Folder Include="public\" />
+    <Folder Include="public\images\" />
+    <Folder Include="public\js\" />
+    <Folder Include="public\data\" />
+    <Folder Include="public\styles\" />
+    <Folder Include="templates\" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\Node.js Tools\Microsoft.NodejsTools.targets" />
   <ProjectExtensions>

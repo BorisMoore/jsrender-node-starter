@@ -1,0 +1,7 @@
+{^{for movies}}
+	<tr class="hover" style="background-color:{{:~bgColor()}};" data-link="css-background-color^{:~bgColor()}">
+		<td>{^{:#index + 1}}: {^{>title}}</td>
+		<td>{^{for languages}}<div>{^{>name}}</div>{{/for}}</td>
+		<td><span class="removeMovie"></span></td>
+	</tr>
+{{/for}}

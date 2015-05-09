@@ -1,7 +1,7 @@
 {
-  "name": "Node.js Getting Started",
-  "description": "A barebones Node.js app using Express 4",
-  "repository": "https://github.com/heroku/node-js-getting-started",
-  "logo": "http://node-js-sample.herokuapp.com/node.svg",
+  "name": "jsrender-node-starter",
+  "description": "Starter app for JsRender server-rendered templates on Node.js using Express 4",
+  "repository": "https://github.com/BorisMoore/jsrender-node-starter",
+  "logo": "https://github.com/BorisMoore/jsrender-node-starter/public/images/logo-jsv.png",
   "keywords": ["node", "express", "static"]
 }
