@@ -1,5 +1,10 @@
-var counter = 0,
+"use strict"
 
+if (!window.$ || !$.templates) {
+	throw "Include jQuery and JsViews scripts in page";
+}
+var listTmpl = $.templates("./templates/movie-list.html"),
+	counter = 0,
 	// The View model
 	app = {
 		select: function(ev) {
@@ -54,7 +59,7 @@ var counter = 0,
 		}
 	};
 
-app.movies = movies; // The movies data was rendered by server in a script block - see {{clientData "movies" /}} in layout.html
+app.movies = movies; // The movies data was rendered by server in a script block - see {{clientData "movies" /}} in layout-movies.html
 
 function bgColor() { // Used my movie-list.html template. This is the client-side version,
 	//  used by data-linked background color - set dynamically based on current index/selection.
@@ -64,12 +69,9 @@ function bgColor() { // Used my movie-list.html template. This is the client-sid
 }
 bgColor.depends = ["#index", "~root.selectedIndex"]; // Update based on index or selection
 
-$.views.helpers("bgColor", bgColor, $.templates("@templates/movie-list.html")); // Provide as helper just for the movie-list template
+$.views.helpers("bgColor", bgColor, listTmpl); // Provide as helper just for the movie-list template
 
 //////////////////////////////////////////////////////////////
-
-$.link(true, ".movieApp", app); // Data-link all the content that was already server-rendered. The server rendering used
-// the layout template (server-side only) plus the movie-list template that is also used client-side use to render any added rows.
 
 $.observable(app.movies).observeAll(function() {
 	app.showMsg(""); // If there have been any changes made to the movies data we clear the Saved... message and this
@@ -80,3 +82,6 @@ $.observable(app.movies).observeAll(function() {
 $(window).on('beforeunload', function(){
 	return app.msg === "" ? "You have unsaved changes." : undefined;
 });
+
+$.link(true, ".movieApp", app); // Data-link all the content that was already server-rendered. The server rendering used
+// the layoutlayout-movies template (server-side only) plus the movie-list template that is also used client-side to render any added rows.

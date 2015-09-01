@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>JsRender Node Starter</title>
+	<link href="/styles/style.css" rel="stylesheet"/>
+
+	{{clientData "movies" /}}
+</head>
+<body>
+<a href="/hello/world">Hello world</a>
+
+<h2>Movies</h2>
+
+<div class="movieApp btns">
+	<button class="reset-btn" data-link="{on resetData}">Reset</button>
+	<button class="save-btn" disabled data-link="{on saveData} disabled{:msg !== ''}">Save Changes</button>
+	<span data-link="msg"></span>
+</div>
+<div class="comment">Click to select and edit</div>
+<table class="movieApp list" data-link="
+	{on 'click' '#addMovie' addMovie}
+	{on 'click' '#movieList tr' select}
+	{on 'click' '.removeMovie' removeMovie}
+">
+	<thead><tr>
+		<th>Title</th><th>Languages</th>
+		<th id="addMovie">Add</th>
+	</tr></thead>
+	<tbody id="movieList" data-link="{include tmpl='./templates/movie-list.html'}">
+		{{include tmpl='./templates/movie-list.html'/}}
+	</tbody>
+</table>
+
+<div class="movieApp detail" data-link="{for movies[selectedIndex] tmpl='./templates/movie-detail.html'}
+	{on 'click' '#addLanguage' addLanguage}
+	{on 'click' '.removeLanguage' removeLanguage}
+"></div>
+
+<script src="//code.jquery.com/jquery-1.11.3.js"></script>
+<script src="//www.jsviews.com/download/jsviews.js"></script>
+<script src="/js/clientbundle-movies.js"></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>JsRender Node Starter</title>
+	{{clientTemplate "./templates/hello-detail.html" /}}
+</head>
+<body>
+<a href="/">Movies</a>
+
+<h2>Hello: "{{:hello}}"</h2>
+
+<button id="render">More...</button>
+
+<div id="result"></div>
+
+<script src="//code.jquery.com/jquery-1.11.3.js"></script>
+<script src="//www.jsviews.com/download/jsrender.js"></script>
+<script src="/js/clientcode-hello.js"></script>
+</body>
+</html>

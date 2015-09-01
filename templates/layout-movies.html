@@ -2,13 +2,13 @@
 <html>
 <head>
 	<title>JsRender Node Starter</title>
-	<script src="//code.jquery.com/jquery-1.11.2.js"></script>
-	<script src="//borismoore.github.io/jsviews.com-staging/download/jsviews.js"></script>
-	<link href="styles/style.css" rel="stylesheet"/>
+	<link href="/styles/style.css" rel="stylesheet"/>
+
 	{{clientData "movies" /}}
-	{{clientTemplate "@templates/movie-list.html" /}}
-	{{clientTemplate "@templates/movie-detail.html" /}}
-	{{clientTemplate "@templates/movie-language.html" /}}
+	{{clientTemplate "./templates/movie-list.html" /}}
+	{{clientTemplate "./templates/movie-detail.html" /}}
+	{{clientTemplate "./templates/sub/movie-language.html" /}}
+
 </head>
 <body>
 <a href="/hello/world">Hello world</a>
@@ -30,16 +30,18 @@
 		<th>Title</th><th>Languages</th>
 		<th id="addMovie">Add</th>
 	</tr></thead>
-	<tbody id="movieList" data-link="{include tmpl='@templates/movie-list.html'}">
-		{{include tmpl="@templates/movie-list.html"/}}
+	<tbody id="movieList" data-link="{include tmpl='./templates/movie-list.html'}">
+		{{include tmpl='./templates/movie-list.html'/}}
 	</tbody>
 </table>
 
-<div class="movieApp detail" data-link="{for movies[selectedIndex] tmpl='@templates/movie-detail.html'}
+<div class="movieApp detail" data-link="{for movies[selectedIndex] tmpl='./templates/movie-detail.html'}
 	{on 'click' '#addLanguage' addLanguage}
 	{on 'click' '.removeLanguage' removeLanguage}
 "></div>
 
-<script src="js/clientapp.js"></script>
+<script src="//code.jquery.com/jquery-1.11.3.js"></script>
+<script src="//www.jsviews.com/download/jsviews.js"></script>
+<script src="/js/clientcode-movies.js"></script>
 </body>
 </html>

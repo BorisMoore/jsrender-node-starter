@@ -1,7 +1,17 @@
 {
   "name": "jsrender-node-starter",
-  "description": "Starter app for JsRender server-rendered templates on Node.js using Express 4",
+  "description": "Starter app for JsRender server-rendered templates on Node.js using Express 4 or Hapi, and optionally Browserify and JsRenderify",
   "repository": "https://github.com/BorisMoore/jsrender-node-starter",
   "logo": "https://github.com/BorisMoore/jsrender-node-starter/public/images/logo-jsv.png",
-  "keywords": ["node", "express", "static"]
+  "keywords": [
+    "jsrender",
+    "jsviews",
+    "templates",
+    "node",
+    "express",
+    "hapi",
+    "browserify",
+    "jsrenderify",
+    "heroku"
+  ]
 }
