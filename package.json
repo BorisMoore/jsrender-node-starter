@@ -19,7 +19,7 @@
     "hapi": "^9.0.3",
     "inert": "^3.0.1",
     "jquery": "^2.1.4",
-    "jsrender": "^1.0.0-rc.69",
+    "jsrender": "^1.0.0-rc.70",
     "serve-favicon": "^2.3.0",
     "through2": "^2.0.0",
     "vision": "^3.0.0"

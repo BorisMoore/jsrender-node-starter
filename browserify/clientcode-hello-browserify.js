@@ -2,8 +2,8 @@
 
 var $, jsrender, detailTmpl;
 
-$ = require('jquery');
-$ = require('jsrender')($);
+$ = require('jquery'); // Load jQuery as module, using Browserify
+require('jsrender')($); // Load JsRender as jQuery plugin
 detailTmpl = require("../templates/hello-detail.html")($);
 
 // Alternatively, see clientcode-movies-browserify.js, for case where jQuery is loaded already as global.jQuery, using:
