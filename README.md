@@ -1,64 +1,75 @@
 ## JsRender Node Starter
 
-A *Node.js* app using [*JsRender*](https://github.com/BorisMoore/jsrender) to render templated views on the server, with [*Express 4*](http://expressjs.com/), [*Hapi*](http://hapijs.com/tutorials/views), or directly in the HTTP response.
+A *Node.js* app using *[JsRender](https://github.com/BorisMoore/jsrender)* to render templated views on the server, with *[Express 4](http://expressjs.com/)*, [Hapi](http://hapijs.com/tutorials/views)*, or directly in the HTTP response.
 
 This sample shows some of the features of *JsRender* *Node* integration, and provides a starting point for your own *Node* projects using templated rendering.
 
-It also shows how to store *JsRender* templates on the file system on the server and then use them for either server-side or client-side rendering, or both. Client-side rendering in the browser can be either with [*JsRender*](http://www.jsviews.com/#jsrender), or with full dynamic data-binding scenarios using  [*JsViews*](http://www.jsviews.com/#jsviews).
+It also shows how to store *JsRender* templates on the file system on the server and then use them for either server-side or client-side rendering, or both. Client-side rendering in the browser can be either with *[JsRender](http://www.jsviews.com/#jsrender)*, or with full dynamic data-binding scenarios using *[JsViews*(http://www.jsviews.com/#jsviews)*.
 
-Accessing server-defined templates in the browser can be facilitated by using [*Browserify*](//browserify.org/), with the *JsRender* `tmplify` *Browserify transform*, or by using the `{{clientTemplate}}` tag when rendering the server page.   
+Accessing server-defined templates in the browser can be facilitated by using *[Browserify](//browserify.org/)*, with the *JsRender* `tmplify` *Browserify transform*, or by using the `{{clientTemplate}}` tag when rendering the server page. 
 
-This app has been deployed to [*Heroku*](https://www.heroku.com/) (using the *index-express.js* script as start script) [here](https://jsrender-node-starter.herokuapp.com/).
+This app has been deployed to *[Heroku](https://www.heroku.com/)* (using the *index-express.js* script as start script) [here](https://jsrender-node-starter.herokuapp.com/).
 
-**Documentation and APIs:** see [JsRender Node.js Quickstart](http://www.jsviews.com/#jsr-node-quickstart) and [JsRender for Node.js](http://www.jsviews.com/#jsrnode).
+**Documentation and APIs:** see *[JsRender Node.js Quickstart](http://www.jsviews.com/#jsr-node-quickstart)* and *[JsRender for Node.js](http://www.jsviews.com/#jsrnode)*.
 
 ### Install
 
-To install all the dependencies used in the different demos of this *JsRender Node Starter* project, including *JsRender* run:
+To install all the dependencies used in the different demos of this *JsRender Node Starter* project, including *JsRender* and *JsViews* run:
 
-```bash	
+```bash
 $ npm install
 ```
 
 To install *JsRender* in your own new project, run:
 
-```bash	
+```bash
 $ npm install jsrender --save
 ```
+
+(*Note:* Similarly, you can use `$ npm install jsviews --save` to install *JsViews* in your own new project -- in order to provide *jsviews.js* from your server, for loading in the browser.)
 
 ### Demo pages
 
 The demo pages can be launched by running one of the different *index-\*.js* alternative start scripts, or equivalently by using one of the following commands (and then opening a browser on the corresponding port):
 
-- **Simple Hapi application**:  *JsRender template on the server*:
+- **Simple Hapi application**: *JsRender template on the server*:
 
-```bash	
-$ npm run-script helloworld 
+```bash
+$ npm run-script helloworld        # or $ node index-helloworld.js
 ```
+
 - **Express 4 application**: *JsRender templates on the server, and JsViews or JsRender in the browser*:
 
-```bash	
-$ npm run-script express 
+```bash
+$ npm run-script express           # or $ node index-express.js
 ```
 
 - **Hapi application**: *JsRender templates on the server, and JsViews or JsRender in the browser*:
 
-```bash	
-$ npm run-script hapi 
+```bash
+$ npm run-script hapi              # or $ node index-hapi.js
 ```
 
-- **Express 4 application with Browserify**: *JsRender templates on the server, JsViews or JsRender in the browser, and Browserify bundled script (including JsRender server templates) compiled for the browser*:
+- **Express 4 application with Browserify**: *JsRender templates on the server, JsViews/JsRender in the browser, and Browserify bundled script (including jsviews.js/jsrender.js and JsRender server templates) compiled for the browser*:
 
-```bash	
-$ npm run-script bundle 
-$ npm run-script express-b 
+```bash
+$ npm run-script bundle            # or $ node ./browserify/makebundle.js
+$ npm run-script express-b         # or $ node index-express-browserify.js
 ```
 
-- **Hapi application with Browserify**: *JsRender templates on the server, JsViews or JsRender in the browser, and Browserify bundled script (including JsRender server templates) compiled for the browser*:
+- **Express 4 application with Browserify** ***(variant with jQuery also as browserify bundled script)***: *JsRender templates on the server, JsViews/JsRender in the browser, and Browserify bundled script (including jquery.js, jsviews.js/jsrender.js and JsRender server templates) compiled for the browser*:
 
-```bash	
-$ npm run-script bundle 
-$ npm run-script express-b 
+```bash
+$ npm run-script bundle            # or $ node ./browserify/makebundle.js
+$ npm run-script express-b2        # or $ node index-express-browserify2.js
+```
+
+- **Hapi application with Browserify**: *JsRender templates on the server, JsViews/JsRender in the browser, and Browserify bundled script (including jsviews.js/jsrender.js and JsRender server templates) compiled for the browser*:
+(index-helloworld.js)
+
+```bash
+$ npm run-script bundle            # or $ node ./browserify/makebundle.js
+$ npm run-script hapi-b            # or $ node index-hapi-browserify.js 
 ```
 
 ### Using JsRender with Express
@@ -81,7 +92,7 @@ app.get('/...', function(req, res) {
 
 But alternatively you can register JsRender as template engine for Express:
 
-```javascript
+```js
 // Load JsRender module
 var jsrender = require('jsrender');
 
@@ -102,7 +113,7 @@ app.get('/...', function(req, res) {
 });
 ```
 
-**Code samples:**  See the *index-express.js* sample in this project. 
+**Code samples:** See the *index-express.js* sample in this project. 
 
 ### [Hapi](http://hapijs.com/) template integration
 
@@ -134,7 +145,7 @@ server.route({
 });
 ```
 
-**Code samples:**  See the *index-hapi.js* sample in this project. 
+**Code samples:** See the *index-hapi.js* sample in this project. 
 
 ### Browserify integration
 
@@ -151,18 +162,18 @@ var myTmpl = $.templates("./templates/myTemplate.html"); // Get compiled templat
 var html = myTmpl(data); // Render
 ```
 
-For details see the documentation topic [JsRender Browserify support in Node.js](http://www.jsviews.com/#node/browserify)
+For details see the documentation topic *[JsRender Browserify support in Node.js](http://www.jsviews.com/#node/browserify)*
 
-**Code samples:**  See the *index-express-browserify.js* and *index-hapi-browserify.js* samples in this project. 
+**Code samples:** See the *index-express-browserify.js* and *index-hapi-browserify.js* samples in this project. 
 
-*Note:*  This sample app adds server rendering, and round-tripping of data, to an existing [browser-only sample](http://www.jsviews.com/#samples/editable/tags) on [jsviews.com](http://www.jsviews.com).
+*Note:* This sample app adds server rendering, and round-tripping of data, to an existing [browser-only sample](http://www.jsviews.com/#samples/editable/tags) on [jsviews.com](http://www.jsviews.com).
 
 ### Deploying this app to Heroku
 This app has been deployed to https://jsrender-node-starter.herokuapp.com/
 
 You can deploy your own copy as follows:
 
-Make sure you have [Node.js](http://nodejs.org/) and the [Heroku Toolbelt](https://toolbelt.heroku.com/) installed.
+Make sure you have *[Node.js](http://nodejs.org/)* and the *[Heroku Toolbelt](https://toolbelt.heroku.com/)* installed.
 
 ```bash
 $ git clone git@github.com:BorisMoore/jsrender-node-starter.git

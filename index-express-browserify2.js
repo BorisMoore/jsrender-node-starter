@@ -14,11 +14,8 @@ var bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-// Set public directory as root for static files,
-// and also enable getting jsrender.js and jsviews.js as static files from node_modules folders
+// Set public directory as root for static files
 app.use(express.static(__dirname + '/public'));
-app.use(express.static(__dirname + '/node_modules/jsrender'));
-app.use(express.static(__dirname + '/node_modules/jsviews'));
 
 // Load JsRender library
 var jsrender = require('jsrender');
@@ -51,18 +48,18 @@ jsrender.views.tags({
 });
 
 ////////////////////////////////////////////////////////////////
-// Render layout-movies.html template as 'home' page using Express
+// Render layout-movies-browserify.html template as 'home' page using Express
 app.get('/', function(req, res) { // Express template
-  res.render('layout-movies', appData, function(err, html) {
+  res.render('layout-movies-browserify2', appData, function(err, html) {
     res.send(html);
   });
 });
 
 ////////////////////////////////////////////////////////////////
-// Render layout-hello.html template as 'hello/world' page - without using Express
+// Render layout-hello-browserify.html template as 'hello/world' page - without using Express
 app.get('/hello/world', function(req, res) {
   // Load template from file system, and render against data
-  var html = jsrender.renderFile('./templates/layout-hello.html', { hello: "world" });
+  var html = jsrender.renderFile('./templates/layout-hello-browserify.html', { hello: "world" });
 
   // Alternatively:
   // Use jsrender file path support to compile template from file, then render

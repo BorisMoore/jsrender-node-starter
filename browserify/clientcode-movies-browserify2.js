@@ -1,15 +1,18 @@
 "use strict"
 
-require('jsviews');
-// Alternatively, in case where jQuery is not loaded already as global.jQuery, we first get var $ = require('jquery'),
-// and pass as a parameter to require('jsviews')($) and require('... template.html')($) - see example in
-// clientcode-hello-browserify2.js
+var $ = require('jquery');
 
-var listTmpl = require("../templates/movie-list.html");
+require('jsviews')($);
+// Alternatively, in case where jQuery is loaded already as global.jQuery, we call require('jsviews') and
+// require('... template.html') without passing a $ parameter - see example in clientcode-hello-browserify.js
+
+var listTmpl = require("../templates/movie-list.html")($);
 
 // We need movie-detail also to be in the browserify bundle, needed for
 // data-link="{for movies[selectedIndex] tmpl='./templates/movie-detail.html'} (see layout-moviews-browserify.html)
-require("../templates/movie-detail.html");
+require("../templates/movie-detail.html")($);
+
+// Alternatively, see clientcode-hello-browserify.js, for case where jQuery is loaded already as global.jQuery
 
 var counter = 0,
   // The View model

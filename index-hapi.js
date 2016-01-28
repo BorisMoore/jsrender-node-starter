@@ -7,26 +7,27 @@ var inert = require('inert');
 var vision = require('vision');
 
 var server = new hapi.Server({
-    connections: {
-        routes: {
-            files: {
-                relativeTo: path.join(__dirname, 'public')
-            }
-        }
+  connections: {
+    routes: {
+      files: {
+        relativeTo: path.join(__dirname, 'public')
+      }
     }
+  }
 });
 
 server.connection({ port: 3000 });
 
 server.register(inert, function () {});
 
-// Set public directory as root for static files
+// Set public directory as root for static files,
+// and also enable getting jsrender.js and jsviews.js as static files from node_modules folders
 server.route({
   method: 'GET',
   path: '/{param*}',
   handler: {
     directory: {
-      path: '.',
+      path: ['.', '../node_modules/jsrender', '../node_modules/jsviews'],
       redirectToSlash: true,
       index: true
     }

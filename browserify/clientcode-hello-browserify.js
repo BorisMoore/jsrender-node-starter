@@ -1,6 +1,6 @@
 "use strict"
 
-var $, jsrender, detailTmpl;
+var $, detailTmpl;
 
 $ = require('jquery'); // Load jQuery as module, using Browserify
 require('jsrender')($); // Load JsRender as jQuery plugin

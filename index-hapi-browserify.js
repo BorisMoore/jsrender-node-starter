@@ -7,13 +7,13 @@ var inert = require('inert');
 var vision = require('vision');
 
 var server = new hapi.Server({
-    connections: {
-        routes: {
-            files: {
-                relativeTo: path.join(__dirname, 'public')
-            }
-        }
+  connections: {
+    routes: {
+      files: {
+        relativeTo: path.join(__dirname, 'public')
+      }
     }
+  }
 });
 
 server.connection({ port: 3000 });
