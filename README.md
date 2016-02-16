@@ -1,10 +1,10 @@
 ## JsRender Node Starter
 
-A *Node.js* app using *[JsRender](https://github.com/BorisMoore/jsrender)* to render templated views on the server, with *[Express 4](http://expressjs.com/)*, [Hapi](http://hapijs.com/tutorials/views)*, or directly in the HTTP response.
+A *Node.js* app using *[JsRender](https://github.com/BorisMoore/jsrender)* to render templated views on the server, with *[Express 4](http://expressjs.com/)*, *[Hapi](http://hapijs.com/tutorials/views)*, or directly in the HTTP response.
 
 This sample shows some of the features of *JsRender* *Node* integration, and provides a starting point for your own *Node* projects using templated rendering.
 
-It also shows how to store *JsRender* templates on the file system on the server and then use them for either server-side or client-side rendering, or both. Client-side rendering in the browser can be either with *[JsRender](http://www.jsviews.com/#jsrender)*, or with full dynamic data-binding scenarios using *[JsViews*(http://www.jsviews.com/#jsviews)*.
+It also shows how to store *JsRender* templates on the file system on the server and then use them for either server-side or client-side rendering, or both. Client-side rendering in the browser can be either with *[JsRender](http://www.jsviews.com/#jsrender)*, or with full dynamic data-binding scenarios using *[JsViews](http://www.jsviews.com/#jsviews)*.
 
 Accessing server-defined templates in the browser can be facilitated by using *[Browserify](//browserify.org/)*, with the *JsRender* `tmplify` *Browserify transform*, or by using the `{{clientTemplate}}` tag when rendering the server page. 
 
@@ -30,7 +30,7 @@ $ npm install jsrender --save
 
 ### Demo pages
 
-The demo pages can be launched by running one of the different *index-\*.js* alternative start scripts, or equivalently by using one of the following commands (and then opening a browser on the corresponding port):
+The demo pages can be launched by running one of the different _index-*.js_ alternative start scripts, or equivalently by using one of the following commands (and then opening a browser on the corresponding port):
 
 - **Simple Hapi application**: *JsRender template on the server*:
 
