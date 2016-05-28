@@ -12,6 +12,11 @@ browserify('browserify/clientcode-hello-browserify.js')
   .bundle()
   .pipe(fs.createWriteStream('public/js/clientbundle-hello.js'));
 
+browserify('browserify/clientcode-hello-browserify2.js')
+  .transform(tmplify)
+  .bundle()
+  .pipe(fs.createWriteStream('public/js/clientbundle-hello2.js'));
+
 browserify('browserify/clientcode-movies-browserify.js')
   .transform(tmplify)
   .bundle()

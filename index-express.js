@@ -72,6 +72,19 @@ app.get('/hello/world', function(req, res) {
 });
 
 ////////////////////////////////////////////////////////////////
+// Render layout-hello2.html template as 'hello/world2' page - without using Express
+app.get('/hello/world2', function(req, res) {
+  // Load template from file system, and render against data
+  var html = jsrender.renderFile('./templates/layout-hello2.html', { hello: "world" });
+
+  // Alternatively:
+  // Use jsrender file path support to compile template from file, then render
+  // var tmpl = jsrender.templates('./templates/layout-hello.html');
+  // html = tmpl.render({ hello: "world" });
+  res.send(html);
+});
+
+////////////////////////////////////////////////////////////////
 // Save updated data from client, received from POST request
 app.post('/save/data', function(req, res) {
   movieData = req.body.movieData;

@@ -63,12 +63,22 @@ server.register(vision, function (err) {
   });
 
 ////////////////////////////////////////////////////////////////
-// Render layout-movies-browserify.html template as 'hello/world' page using Hapi
+// Render layout-hello-browserify.html template as 'hello/world' page using Hapi
   server.route({
     method: 'GET',
     path: '/hello/world',
     handler: function (request, reply) {
       return reply.view('layout-hello-browserify', { hello: "world" });
+    }
+  });
+
+////////////////////////////////////////////////////////////////
+// Render layout-hello-browserify2.html template as 'hello/world2' page using Hapi
+  server.route({
+    method: 'GET',
+    path: '/hello/world2',
+    handler: function (request, reply) {
+      return reply.view('layout-hello-browserify2', { hello: "world" });
     }
   });
 });

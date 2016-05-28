@@ -72,6 +72,16 @@ server.register(vision, function (err) {
       return reply.view('layout-hello', { hello: "world" });
     }
   });
+
+////////////////////////////////////////////////////////////////
+// Render layout-hello2.html template as 'hello/world2' page using Hapi
+  server.route({
+    method: 'GET',
+    path: '/hello/world2',
+    handler: function (request, reply) {
+      return reply.view('layout-hello2', { hello: "world" });
+    }
+  });
 });
 
 ////////////////////////////////////////////////////////////////

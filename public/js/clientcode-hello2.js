@@ -1,6 +1,6 @@
 "use strict"
 
-var detailTmpl = $.templates("./templates/hello-detail.html");
+var detailTmpl = jsrender.templates("./templates/hello-detail.html");
 var data = {
   world: "Brave New",
   version: 1
@@ -8,11 +8,11 @@ var data = {
 
 function incrementWorld() {
   var html = detailTmpl.render(data);
-  $("#result").html(html);
+  document.getElementById("result").innerHTML = html;
   data.version ++;
   data.world += "+";
 };
 
-$("#incrementBtn").on("click", incrementWorld);
+document.getElementById("incrementBtn").onclick = incrementWorld;
 
 incrementWorld();

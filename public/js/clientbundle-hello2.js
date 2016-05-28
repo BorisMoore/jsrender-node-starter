@@ -1,29 +1,34 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict"
 
-var $, detailTmpl;
+var detailTmpl;
 
-require('jsrender'); // Load JsRender as jQuery plugin
-detailTmpl = require("../templates/hello-detail.html");
+var jsrender = require('jsrender')(); // Load JsRender
+detailTmpl = require("../templates/hello-detail.html")(jsrender);
 
-// Alternatively, see clientcode-movies-browserify.js, for case where jQuery is loaded already as global.jQuery, using:
-//  require('jsrender');
-//  detailTmpl = require("../templates/hello-detail.html");
+// Alternatively, see clientcode-hello-browserify.js, for case where jQuery is loaded already as global.jQuery, using:
+//  $ = require('jquery'); // Load jQuery as module, using Browserify
+//  require('jsrender')($); // Load JsRender as jQuery plugin
+//  detailTmpl = require("../templates/hello-detail.html")($);
 
 var data = {
   world: "Brave New",
   version: 1
 };
 
-$("#render").on("click", function() {
+function incrementWorld() {
   var html = detailTmpl.render(data);
-  $("#result").html(html);
+  document.getElementById("result").innerHTML = html;
   data.version ++;
   data.world += "+";
-});
+};
+
+document.getElementById("incrementBtn").onclick = incrementWorld;
+
+incrementWorld();
 
 },{"../templates/hello-detail.html":3,"jsrender":2}],2:[function(require,module,exports){
-/*! JsRender v0.9.74 (Beta): http://jsviews.com/#jsrender */
+/*! JsRender v0.9.75 (Beta): http://jsviews.com/#jsrender */
 /*! **VERSION FOR WEB** (For NODE.JS see http://jsviews.com/download/jsrender-node.js) */
 /*
  * Best-of-breed templating in browser or on Node.js.
@@ -40,11 +45,7 @@ $("#render").on("click", function() {
 	// global var is the this object, which is window when running in the usual browser environment
 	var $ = global.jQuery;
 
-	if (typeof define === "function" && define.amd) { // AMD script loader, e.g. RequireJS
-		define(function() {
-			return factory(global);
-		});
-	} else if (typeof exports === "object") { // CommonJS e.g. Browserify
+	if (typeof exports === "object") { // CommonJS e.g. Browserify
 		module.exports = $
 			? factory(global, $)
 			: function($) { // If no global jQuery, take optional jQuery passed as parameter: require('jsrender')(jQuery)
@@ -53,6 +54,10 @@ $("#render").on("click", function() {
 				}
 				return factory(global, $);
 			};
+	} else if (typeof define === "function" && define.amd) { // AMD script loader, e.g. RequireJS
+		define(function() {
+			return factory(global);
+		});
 	} else { // Browser using plain <script> tag
 		factory(global, false);
 	}
@@ -69,7 +74,7 @@ var setGlobals = $ === false; // Only set globals if script block in browser (no
 
 $ = $ && $.fn ? $ : global.jQuery; // $ is jQuery passed in by CommonJS loader (Browserify), or global jQuery.
 
-var versionNumber = "v0.9.74",
+var versionNumber = "v0.9.75",
 	jsvStoreName, rTag, rTmplString, topView, $views,
 
 //TODO	tmplFnsCache = {},
@@ -1241,7 +1246,7 @@ function onRenderError(e, view, fallback) {
 		message = fallback; // There is a settings.debugMode(handler) onError override. Call it, and use return value (if any) to replace message
 	}
 
-	return view && !view.linkCtx && view.linked ? $converters.html(message) : message;
+	return view && !view.linkCtx ? $converters.html(message) : message;
 }
 
 function error(message) {
@@ -2090,7 +2095,7 @@ if (jsrToJq) { // Moving from jsrender namespace to jQuery namepace - copy over 
 	jsr.views.sub._jq($);
 }
 return $ || jsr;
-}, this));
+}, window));
 
 },{}],3:[function(require,module,exports){
 (function (global){
