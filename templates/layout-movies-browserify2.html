@@ -14,6 +14,7 @@
 
 <div class="movieApp btns">
   <button class="reset-btn" data-link="{on resetData}">Reset</button>
+  <button class="cancel-btn" disabled data-link="{on cancel} disabled{:msg !== ''}">Cancel</button>
   <button class="save-btn" disabled data-link="{on saveData} disabled{:msg !== ''}">Save Changes</button>
   <span data-link="msg"></span>
 </div>

@@ -103,13 +103,19 @@ table td {
     padding-top: 8px;
 }
 
+.removeLanguage, .removeMovie {
+    margin-right: 3px;
+    display: inline-block;
+    float: right;
+    cursor: pointer;
+}
+
 .removeLanguage:after, .removeMovie:after {
     color: #be614c;
     font-weight: bold;
+    font-style: normal;
     padding: 0 6px 2px;
     content: 'x';
-    float: right;
-    cursor: pointer;
 }
 
 .removeLanguage:hover:after, .removeMovie:hover:after {

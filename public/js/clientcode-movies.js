@@ -30,6 +30,7 @@ var listTmpl = $.templates("./templates/movie-list.html"),
       this.setIndex();
       var thisIndex = $.view(ev.currentTarget).index;
       $.observable(this.movies).remove(thisIndex);
+      return false;
     },
     addLanguage: function() {
       var selectedMovie = this.movies[this.selectedIndex];
@@ -41,16 +42,23 @@ var listTmpl = $.templates("./templates/movie-list.html"),
       var selectedMovie = this.movies[this.selectedIndex];
       var thisIndex = $.view(ev.currentTarget).index;
       $.observable(selectedMovie.languages).remove(thisIndex);
+      return false;
     },
     resetData: function() {
-      $.observable(this.movies).refresh([
+      $.observable(this.movies).refresh([ // Reset to standard data
         {title:"Meet Joe Black", languages: [{name: "English"},{name: "French"}]},
         {title:"Eyes Wide Shut", languages: [{name: "German"},{name: "French"},{name: "Spanish"}]}]);
       $.observable(this).removeProperty("selectedIndex");
       this.saveData();
     },
+    cancel: function() {
+      $.observable(this.movies).refresh(JSON.parse(savedData)); // Reset to saved data
+      $.observable(this).removeProperty("selectedIndex");
+      this.showMsg(null);
+    },
     saveData: function() {
-      $.post("/save/data", {movieData : JSON.stringify(this.movies)}, function(msg) {
+      savedData = JSON.stringify(this.movies); // Copy of the movies data that was rendered by server in a script block - see {{clientData "movies" /}} in layout-movies.html
+      $.post("/save/data", {movieData : savedData}, function(msg) {
         app.showMsg(msg);
       });
     },
@@ -59,7 +67,9 @@ var listTmpl = $.templates("./templates/movie-list.html"),
     }
   };
 
-app.movies = movies; // The movies data was rendered by server in a script block - see {{clientData "movies" /}} in layout-movies.html
+app.movies = movies; // The movies data that was rendered by server in a script block - see {{clientData "movies" /}} in layout-movies.html
+
+var savedData = JSON.stringify(app.movies); // Copy of the movies data that was rendered by server in a script block - see {{clientData "movies" /}} in layout-movies.html
 
 function bgColor() { // Used my movie-list.html template. This is the client-side version,
   //  used by data-linked background color - set dynamically based on current index/selection.
