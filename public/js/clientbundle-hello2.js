@@ -28,7 +28,7 @@ document.getElementById("incrementBtn").onclick = incrementWorld;
 incrementWorld();
 
 },{"../templates/hello-detail.html":3,"jsrender":2}],2:[function(require,module,exports){
-/*! JsRender v0.9.80 (Beta): http://jsviews.com/#jsrender */
+/*! JsRender v0.9.81 (Beta): http://jsviews.com/#jsrender */
 /*! **VERSION FOR WEB** (For NODE.JS see http://jsviews.com/download/jsrender-node.js) */
 /*
  * Best-of-breed templating in browser or on Node.js.
@@ -74,7 +74,7 @@ var setGlobals = $ === false; // Only set globals if script block in browser (no
 
 $ = $ && $.fn ? $ : global.jQuery; // $ is jQuery passed in by CommonJS loader (Browserify), or global jQuery.
 
-var versionNumber = "v0.9.80",
+var versionNumber = "v0.9.81",
 	jsvStoreName, rTag, rTmplString, topView, $views,	$expando,
 
 //TODO	tmplFnsCache = {},
@@ -97,6 +97,7 @@ var versionNumber = "v0.9.80",
 	rAttrEncode = /[\x00`><"'&=]/g, // Includes > encoding since rConvertMarkers in JsViews does not skip > characters in attribute strings
 	rIsHtml = /[\x00`><\"'&=]/,
 	rHasHandlers = /^on[A-Z]|^convert(Back)?$/,
+	rWrappedInViewMarker = /^\#\d+_`[\s\S]*\/\d+_`$/,
 	rHtmlEncode = rAttrEncode,
 	viewId = 0,
 	charEntities = {
@@ -285,7 +286,7 @@ function $viewsDelimiters(openChars, closeChars, link) {
 	rTag = "(?:(\\w+(?=[\\/\\s\\" + delimCloseChar0 + "]))|(\\w+)?(:)|(>)|(\\*))\\s*((?:[^\\"
 		+ delimCloseChar0 + "]|\\" + delimCloseChar0 + "(?!\\" + delimCloseChar1 + "))*?)";
 
-	// make rTag available to JsViews (or other components) for parsing binding expressions
+	// Make rTag available to JsViews (or other components) for parsing binding expressions
 	$sub.rTag = "(?:" + rTag + ")";
 	//                        { ^? {   tag+params slash?  or closingTag                                                   or comment
 	rTag = new RegExp("(?:" + openChars + rTag + "(\\/)?|\\" + delimOpenChar0 + "(\\" + linkChar + ")?\\" + delimOpenChar1 + "(?:(?:\\/(\\w+))\\s*|!--[\\s\\S]*?--))" + closeChars, "g");
@@ -643,6 +644,11 @@ function renderTag(tagName, parentView, tmpl, tagCtxs, isUpdate, onError) {
 			itemRet = undefined;
 			if (tag.render) {
 				itemRet = tag.render.apply(tag, args);
+				if (parentView.linked && itemRet && tag.linkedElem && !rWrappedInViewMarker.test(itemRet)) {
+					// When a tag renders content from the render method, with data linking, and has a linkedElem binding, then we need to wrap with
+					// view markers, if absent, so the content is a view associated with the tag, which will correctly dispose bindings if deleted.
+					itemRet = renderWithViews($.templates(itemRet), args[0], undefined, undefined, parentView, undefined, undefined, tag);
+				}
 			}
 			if (!args.length) {
 				args = [parentView]; // no arguments - (e.g. {{else}}) get data context from view.
@@ -1695,7 +1701,7 @@ function tmplFn(markup, tmpl, isLinkExpr, convertBack, hasElse) {
 //		result = markup;
 	if (isLinkExpr) {
 		if (convertBack !== undefined) {
-			markup = markup.slice(0, -convertBack.length - 2) + delimCloseChar1;
+			markup = markup.slice(0, -convertBack.length - 2) + delimCloseChar0;
 		}
 		markup = delimOpenChar0 + markup + delimCloseChar1;
 	}
@@ -1734,7 +1740,7 @@ function setPaths(fn, pathsArr) {
 	for (; i < l; i++) {
 		paths = pathsArr[i];
 		for (key in paths) {
-			if (key !== "_jsvto" && paths[key].length) {
+			if (key !== "_jsvto" && paths.hasOwnProperty(key) && paths[key].length) {
 				fn.deps = fn.deps.concat(paths[key]); // deps is the concatenation of the paths arrays for the different bindings
 			}
 		}
@@ -2157,7 +2163,7 @@ function getTargetProps(source) {
 	if (typeof source === OBJECT) {
 		for (key in source) {
 			prop = source[key];
-			if (key !== $expando  && !$isFunction(prop)) {
+			if (key !== $expando && source.hasOwnProperty(key) && !$isFunction(prop)) {
 				props.push({key: key, prop: prop});
 			}
 		}
@@ -2357,7 +2363,7 @@ if (!(jsr || $ && $.render)) {
 }
 //========================== Define default delimiters ==========================
 $subSettings = $sub.settings;
-$isArray = $.isArray;
+$isArray = ($||jsr).isArray;
 $viewsSettings.delimiters("{{", "}}", "^");
 
 if (jsrToJq) { // Moving from jsrender namespace to jQuery namepace - copy over the stored items (templates, converters, helpers...)
