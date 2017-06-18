@@ -57,7 +57,7 @@ $ npm run-script bundle            # or $ node ./browserify/makebundle.js
 $ npm run-script express-b         # or $ node index-express-browserify.js
 ```
 
-- **Express 4 application with Browserify** ***(variant with jQuery also as browserify bundled script)***: *JsRender templates on the server, JsViews/JsRender in the browser, and Browserify bundled script (including jquery.js, jsviews.js/jsrender.js and JsRender server templates) compiled for the browser*:
+- **Express 4 application with Browserify** **_(variant with jQuery also as browserify bundled script)_**: *JsRender templates on the server, JsViews/JsRender in the browser, and Browserify bundled script (including jquery.js, jsviews.js/jsrender.js and JsRender server templates) compiled for the browser*:
 
 ```bash
 $ npm run-script bundle            # or $ node ./browserify/makebundle.js
@@ -169,6 +169,7 @@ For details see the documentation topic *[JsRender Browserify support in Node.js
 *Note:* This sample app adds server rendering, and round-tripping of data, to an existing [browser-only sample](http://www.jsviews.com/#samples/editable/tags) on [jsviews.com](http://www.jsviews.com).
 
 ### Deploying this app to Heroku
+
 This app has been deployed to https://jsrender-node-starter.herokuapp.com/
 
 You can deploy your own copy as follows:
