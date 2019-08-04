@@ -1,9 +1,11 @@
-// Rendering JsRender templates using Express 4 and Browserify
+'use strict'
+// Rendering JsRender templates using Express 4
+// Use this file as start file, after installing Express
 
-var fs = require('fs');
+var Express = require('express');
+var Fs = require('fs');
 
-var express = require('express');
-var app = express();
+var app = Express();
 
 app.set('port', (process.env.PORT || 5000));
 
@@ -16,9 +18,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 // Set public directory as root for static files,
 // and also enable getting jsrender.js and jsviews.js as static files from node_modules folders
-app.use(express.static(__dirname + '/public'));
-app.use(express.static(__dirname + '/node_modules/jsrender'));
-app.use(express.static(__dirname + '/node_modules/jsviews'));
+app.use(Express.static(__dirname + '/public'));
+app.use(Express.static(__dirname + '/node_modules/jsrender'));
+app.use(Express.static(__dirname + '/node_modules/jsviews'));
 
 // Load JsRender library
 var jsrender = require('jsrender');
@@ -33,7 +35,7 @@ app.set('views', __dirname + '/templates');
 
 ////////////////////////////////////////////////////////////////
 // Load the current data for movies - stored in the file system
-var movieData = fs.readFileSync('./public/data/movies.json');
+var movieData = Fs.readFileSync('./public/data/movies.json');
 var appData = {movies: JSON.parse(movieData)};
 
 // Provide the bgColor helper, used by the movie-list template for striped rows. (
@@ -89,7 +91,7 @@ app.get('/hello/world2', function(req, res) {
 app.post('/save/data', function(req, res) {
   movieData = req.body.movieData;
   appData.movies = JSON.parse(movieData);
-  fs.writeFileSync('./public/data/movies.json', movieData);
+  Fs.writeFileSync('./public/data/movies.json', movieData);
   res.send("Saved...");
 });
 

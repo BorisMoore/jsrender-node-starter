@@ -1,9 +1,11 @@
+'use strict'
 // Rendering JsRender templates using Express 4 and Browserify
+// Use this file as start file, after installing Express
 
-var fs = require('fs');
+var Express = require('express');
+var Fs = require('fs');
 
-var express = require('express');
-var app = express();
+var app = Express();
 
 app.set('port', (process.env.PORT || 5000));
 
@@ -15,7 +17,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 // Set public directory as root for static files
-app.use(express.static(__dirname + '/public'));
+app.use(Express.static(__dirname + '/public'));
 
 // Load JsRender library
 var jsrender = require('jsrender');
@@ -30,7 +32,7 @@ app.set('views', __dirname + '/templates');
 
 ////////////////////////////////////////////////////////////////
 // Load the current data for movies - stored in the file system
-var movieData = fs.readFileSync('./public/data/movies.json');
+var movieData = Fs.readFileSync('./public/data/movies.json');
 var appData = {movies: JSON.parse(movieData)};
 
 // Provide the bgColor helper, used by the movie-list template for striped rows. (
@@ -86,7 +88,7 @@ app.get('/hello/world2', function(req, res) {
 app.post('/save/data', function(req, res) {
   movieData = req.body.movieData;
   appData.movies = JSON.parse(movieData);
-  fs.writeFileSync('./public/data/movies.json', movieData);
+  Fs.writeFileSync('./public/data/movies.json', movieData);
   res.send("Saved...");
 });
 
