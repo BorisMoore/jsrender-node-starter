@@ -28,7 +28,7 @@ document.getElementById("incrementBtn").onclick = incrementWorld;
 incrementWorld();
 
 },{"../templates/hello-detail.html":3,"jsrender":2}],2:[function(require,module,exports){
-/*! JsRender v1.0.4: http://jsviews.com/#jsrender */
+/*! JsRender v1.0.5: http://jsviews.com/#jsrender */
 /*! **VERSION FOR WEB** (For NODE.JS see http://jsviews.com/download/jsrender-node.js) */
 /*
  * Best-of-breed templating in browser or on Node.js.
@@ -74,7 +74,7 @@ var setGlobals = $ === false; // Only set globals if script block in browser (no
 
 $ = $ && $.fn ? $ : global.jQuery; // $ is jQuery passed in by CommonJS loader (Browserify), or global jQuery.
 
-var versionNumber = "v1.0.4",
+var versionNumber = "v1.0.5",
 	jsvStoreName, rTag, rTmplString, topView, $views, $expando,
 	_ocp = "_ocp", // Observable contextual parameter
 
