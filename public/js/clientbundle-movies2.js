@@ -10982,7 +10982,7 @@ return jQuery;
 } );
 
 },{}],3:[function(require,module,exports){
-/*! jsviews.js v1.0.7 single-file version: http://jsviews.com/ */
+/*! jsviews.js v1.0.8 single-file version: http://jsviews.com/ */
 /*! includes JsRender, JsObservable and JsViews - see: http://jsviews.com/#download */
 
 /* Interactive data-driven views using JsRender templates */
@@ -11031,7 +11031,7 @@ if (!$ || !$.fn) {
 	throw "JsViews requires jQuery"; // We require jQuery
 }
 
-var versionNumber = "v1.0.7",
+var versionNumber = "v1.0.8",
 
 	jsvStoreName, rTag, rTmplString, topView, $views, $observe, $observable, $expando,
 	_ocp = "_ocp",      // Observable contextual parameter
@@ -11605,8 +11605,8 @@ function convertArgs(tagElse, bound) { // tag.cvtArgs() or tag.cvtArgs(tagElse?,
 		}
 		bindFrom = bindFrom || [0];
 		l = bindFrom.length;
-		if (!$isArray(converter) || converter.length !== l) {
-			converter = [converter];
+		if (!$isArray(converter) || (converter.arg0 !== false && (l === 1 || converter.length !== l || converter.arg0))) {
+			converter = [converter]; // Returning converter as first arg, even if converter value is an array
 			bindFrom = [0];
 			l = 1;
 		}
@@ -11996,7 +11996,7 @@ View.prototype = {
 		if ($subSettings._cchCt > this.cache._ct) {
 			this.cache = {_ct: $subSettings._cchCt};
 		}
-		return this.cache[key] || (this.cache[key] = cpFnStore[key](this.data, this, $sub));
+		return this.cache[key] !== undefined ? this.cache[key] : (this.cache[key] = cpFnStore[key](this.data, this, $sub));
 	},
 	_is: "view"
 };
@@ -15448,18 +15448,20 @@ function updateValues(sourceValues, tagElse, async, bindId, ev) {
 			sourceValues = [vals.slice()];
 		}
 		origVals = sourceValues;
+		l = tos.length;
 		if (cvtBack) {
 			sourceValues = cvtBack.apply(tag, sourceValues);
 			if (sourceValues === undefined) {
 				tos = []; // If cvtBack does not return anything, do not update target.
 				//(But cvtBack may be designed to modify observable values from code as a side effect)
 			}
-			sourceValues = $isArray(sourceValues) ? sourceValues : [sourceValues];
-			// If there are multiple tos (e.g. multiple args on data-linked input) then cvtBack can update not only
-			// the first arg, but all of them by returning an array.
+			if (!$isArray(sourceValues) || (sourceValues.arg0 !== false && (l === 1 || sourceValues.length !== l || sourceValues.arg0))) {
+				sourceValues = [sourceValues];
+				// If there are multiple tos (e.g. multiple args on data-linked input) then cvtBack can update not only
+				// the first arg, but all of them by returning an array.
+			}
 		}
 
-		l = tos.length;
 		while (l--) {
 			if (to = tos[l]) {
 				to = to + "" === to ? [linkCtx.data, to] : to; // [object, path]
@@ -15519,21 +15521,21 @@ function onElemChange(ev) {
 		fromAttr = defaultAttr(source),
 		setter = fnSetters[fromAttr];
 
-	if (!source._jsvTr || ev.delegateTarget !== activeBody && ev.target.type !== "number" || ev.type === "input") {
+	if (!source._jsvTr || ev.delegateTarget !== activeBody && source.type !== "number" || ev.type === "input") {
 		// If this is an element using trigger, ignore event delegated (bubbled) to activeBody
 		val = $isFunction(fromAttr)
 			? fromAttr(source)
-			: (source = $(source), setter
-				? source[setter]()
-				: source.attr(fromAttr));
+			: setter
+				? $(source)[setter]()
+				: $(source).attr(fromAttr);
 
-		ev.target._jsvChg = 1; // // Set 'changing' marker to prevent linkedElem change event triggering its own refresh
+		source._jsvChg = 1; // // Set 'changing' marker to prevent linkedElem change event triggering its own refresh
 		rSplitBindings.lastIndex = 0; // Ensure starts at zero
-		while (bindId = rSplitBindings.exec(ev.target._jsvBnd)) {
+		while (bindId = rSplitBindings.exec(source._jsvBnd)) {
 			// _jsvBnd is a string with the syntax: "&bindingId1&bindingId2"
 			updateValue(val, source._jsvInd, source._jsvElse, undefined, bindId[1], ev);
 		}
-		ev.target._jsvChg = undefined; // Clear marker
+		source._jsvChg = undefined; // Clear marker
 	}
 }
 
@@ -15578,8 +15580,8 @@ function onDataLinkedTagChange(ev, eventArgs) {
 			}
 			// Compiled link expression for linkTag: return value for data-link="{:xxx}" with no cvt or cvtBk, otherwise tagCtx or tagCtxs
 			attr = tag && tag.attr || linkCtx.attr || (linkCtx._dfAt = defaultAttr(target, true, cvt !== undefined));
-			if (attr === VALUE && (tag && tag.parentElem || linkCtx.elem).type === CHECKBOX) {
-				attr = CHECKED;
+			if (linkCtx._dfAt === VALUE && (tag && tag.parentElem || linkCtx.elem).type === CHECKBOX) {
+				attr = CHECKED; // This is a single checkbox (not in a checkboxgroup - which might have data-link="value{:...}" so linkCtx.attr === VALUE, but would not have _dfAt === VALUE)
 			}
 			// For {{: ...}} without a convert or convertBack, (tag and linkFn._tag undefined) we already have the sourceValue, and we are done
 			if (tag) {
@@ -15828,6 +15830,8 @@ function updateContent(sourceValue, linkCtx, attr, tag) {
 						late = view.link(source, target, prevNode, nextNode, sourceValue, tag && {tag: tag._tgId});
 					}
 				}
+			} else if (target._jsvSel) {
+				$target[setter](sourceValue); // <select> (or multiselect)
 			} else {
 				if (change = change || targetVal !== sourceValue) {
 					if (attr === "text" && target.children && !target.children[0]) {
@@ -15837,9 +15841,9 @@ function updateContent(sourceValue, linkCtx, attr, tag) {
 						$target[setter](sourceValue);
 					}
 				}
-				if ((jsvSel = targetParent._jsvSel)
+				if ((jsvSel = targetParent._jsvSel) !== undefined
 					// Setting value of <option> element
-					&& (attr === VALUE || !$target.attr(VALUE))) { // Setting value attribute, or setting textContent if attribute is null
+					&& (attr === VALUE || $target.attr(VALUE) === undefined)) { // Setting value attribute, or setting textContent if attribute is null
 					// Set/unselect selection based on value set on parent <select>. Works for multiselect too
 					target.selected = $inArray("" + sourceValue, $isArray(jsvSel) ? jsvSel : [jsvSel]) > -1;
 				}
@@ -16158,10 +16162,16 @@ function observeAndBind(linkCtx, source, target) {
 				linkedElem = linkedElems[l];
 				k = linkedElem && linkedElem.length;
 				while (k--) {
-					linkedElem[k]._jsvLkEl = tag;
-					bindLinkedElChange(tag, linkedElem[k]);
-					linkedElem[k]._jsvBnd = "&" + bindId + "+"; // Add a "+" for cloned binding - so removing
-					// elems with cloned bindings will not remove the 'parent' binding from the bindingStore.
+					if (linkedElem[k]._jsvLkEl) {
+						if (!linkedElem[k]._jsvBnd) {
+							linkedElem[k]._jsvBnd = "&" + bindId + "+"; // Add a "+" for cloned binding - so removing
+							// elems with cloned bindings will not remove the 'parent' binding from the bindingStore.
+						}
+					} else {
+						linkedElem[k]._jsvLkEl = tag;
+						bindLinkedElChange(tag, linkedElem[k]);
+						linkedElem[k]._jsvBnd = "&" + bindId + "+";
+					}
 				}
 			}
 		} else if (cvtBk !== undefined) {
@@ -16978,13 +16988,14 @@ function addDataBinding(late, linkMarkup, node, currentView, boundTagId, isLink,
 }
 
 function bindDataLinkTarget(linkCtx, late) {
-	// Add data link bindings for a link expression in data-link attribute markup
+	// Add data link bindings for a link expression in data-link attribute markup, or for a linkedElement
 	function handler(ev, eventArgs) {
 		// If the link expression uses a custom tag, the onDataLinkedTagChange call will call renderTag, which will set tagCtx on linkCtx
 		if (!eventArgs || !eventArgs.refresh) {
 			onDataLinkedTagChange.call(linkCtx, ev, eventArgs);
 		}
 	}
+
 	var view,
 		linkCtxType = linkCtx.type;
 	if (linkCtxType === "top" || linkCtxType === "expr") {
@@ -16998,16 +17009,26 @@ function bindDataLinkTarget(linkCtx, late) {
 	linkCtx._ctxCb = $sub._gccb(view = linkCtx.view); // getContextCallback: _ctxCb, for filtering/appending to dependency paths: function(path, object) { return [(object|path)*]}
 	linkCtx._hdl = handler;
 	// handler._ctx = linkCtx; Could pass linkCtx for use in a depends = function() {} call, so depends is different for different linkCtx's
-	if (linkCtx.elem.nodeName === "SELECT" && linkCtxType === "link" && !linkCtx.attr
-		&& linkCtx.convert !== undefined) { // data-link expression on <select> tag is the assign tag {:...}, not some other expression such as {on ...} (See https://github.com/BorisMoore/jsviews/issues/444)
-		var $elem = $(linkCtx.elem);
-		$elem.on("jsv-domchange", function() {
-			// If the options have changed dynamically under the select, we need to refresh the data-linked selection, using the new options
-			if (!arguments[3].refresh) { // eventArgs.refresh !== true - so a refresh action will only set the selection once
-				var source = linkCtx.fn(view.data, view, $sub);
-				$elem.val(linkCtx.convert || linkCtx.convertBack ? $sub._cnvt(linkCtx.convert, view, source) : source);
-			}
-		});
+
+	if (linkCtx.elem.nodeName === "SELECT"
+		&& (linkCtx.elem._jsvLkEl // A SELECT which is a linkedElement
+		|| (linkCtxType === "link" && !linkCtx.attr && linkCtx.convert !== undefined))) { // A SELECT with a data-link binding (the assign tag {:...}, not another expression such as {on ...} (See https://github.com/BorisMoore/jsviews/issues/444))
+			var source,
+				elem = linkCtx.elem,
+				$elem = $(elem);
+			$elem.on("jsv-domchange", function() {
+				// If the options have changed dynamically under the select, we need to refresh the data-linked selection, using the new options
+				if (!arguments[3].refresh) { // eventArgs.refresh !== true - so a refresh action will only set the selection once
+					if (elem._jsvLkEl) {
+						$elem.val(elem._jsvLkEl.cvtArgs(elem._jsvElse, 1)[elem._jsvInd]); // SELECT is a linkedElement, so set to value of bndArgs(elseIndex)[bindToIndex]
+					} else if (linkCtx.tag) {
+						$elem.val(linkCtx.tag.cvtArgs(0,1)); // SELECT with data-link expression with convert=... convertBack=...
+					} else {
+						source = linkCtx.fn(view.data, view, $sub); // SELECT with data-link expression (either data-link='expression', or data-link='{cvt:expression:cvtBk}')
+						$elem.val(linkCtx.convert || linkCtx.convertBack ? $sub._cnvt(linkCtx.convert, view, source) : source);
+					}
+				}
+			});
 	}
 
 	if (linkCtx.fn._lr) {
@@ -17273,7 +17294,9 @@ function callAfterLink(tag, ev, eventArgs) {
 								linkedEl._jsvInd = indexTo;
 								linkedEl._jsvElse = m;
 								bindLinkedElChange(tag, linkedEl);
-								linkedEl._jsvBnd = "&" + tag._tgId + "+"; // Add a "+" for cloned binding - so removing
+								if (tag._tgId) {
+									linkedEl._jsvBnd = "&" + tag._tgId + "+"; // Add a "+" for cloned binding - so removing
+								}
 								// elems with cloned bindings will not remove the 'parent' binding from the bindingStore.
 							}
 						}
@@ -17539,14 +17562,15 @@ function removeViewBinding(bindId, linkedElemTag, elem) {
 	} else if (binding && (!elem || elem === binding.elem)) { // Test that elem is actually binding.elem, since cloned elements can have inappropriate markerNode info
 		delete bindingStore[bindId]; // Delete already, so call to onDispose handler below cannot trigger recursive deletion (through recursive call to jQuery cleanData)
 		for (objId in binding.bnd) {
-			object = binding.bnd[objId];
-			obsId = binding.cbId;
-			if ($isArray(object)) {
-				$([object]).off(arrayChangeStr + obsId).off(propertyChangeStr + obsId); // There may be either or both of arrayChange and propertyChange
-			} else {
-				$(object).off(propertyChangeStr + obsId);
+			if (object = binding.bnd[objId]) {
+				obsId = binding.cbId;
+				if ($isArray(object)) {
+					$([object]).off(arrayChangeStr + obsId).off(propertyChangeStr + obsId); // There may be either or both of arrayChange and propertyChange
+				} else {
+					$(object).off(propertyChangeStr + obsId);
+				}
+				delete binding.bnd[objId];
 			}
-			delete binding.bnd[objId];
 		}
 
 		if (linkCtx = binding.linkCtx) {
@@ -17980,11 +18004,11 @@ function addLinkMethods(tagOrView) { // tagOrView is View prototype or tag insta
 								if (val !== undefined && !linkedEl._jsvChg && theTag.linkCtx._val !== val) {
 									if (linkedEl.value !== undefined) {
 										if (linkedEl.type === CHECKBOX) {
-											linkedEl[CHECKED] = val && val !== "false";
+											linkedEl[CHECKED] = $.isArray(val)
+												? $.inArray(linkedEl.value, val) > -1
+												: val && val !== "false";
 										} else if (linkedEl.type === RADIO) {
 											linkedEl[CHECKED] = (linkedEl.value === val);
-										} else if ($isArray(val)) {
-											linkedEl.value = val; // Don't use jQuery since it replaces array by mapped clone
 										} else {
 											$(linkedEl).val(val); // Use jQuery for attrHooks - can't just set value (on select, for example)
 										}
@@ -18468,14 +18492,19 @@ $tags({
 				// Configure the name for each radio input element
 				$linkedElem[l].name = $linkedElem[l].name || tag.name;
 			}
-			// Establish a domchange listener in case this radiogroup wraps a {^{for}} or {^{if}} or similar which might dynamically insert new radio input elements
-			$(domChngCntnr).on("jsv-domchange", function(ev, forOrIfTagCtx) {
+			// Establish a domchange listener in case this radiogroup wraps a {^{for}} or {^{if}} or similar
+			// which might dynamically insert new radio input elements
+			$(domChngCntnr).on("jsv-domchange", tag._dmChg = function(ev, forOrIfTagCtx, linkCtx, eventArgs) {
 				var linkedElem, val,
 					parentTags = forOrIfTagCtx.ctx.parentTags;
-				if (!tag.inline || domChngCntnr !== tag.parentElem // The domChngCntnr is specific to this tag
-					// The domChngCntnr is the parentElem of this tag, so need to make sure dom change event is for
-					// a content change within this tag, not outside it.
-					|| parentTags && parentTags[tag.tagName] === tag) {
+				if (!eventArgs.refresh &&
+					(!tag.inline ||
+						domChngCntnr !== tag.parentElem ||
+						// If the tag is inline, and the domChngCntnr is the parentElem, then we need to
+						// make sure dom change event is fora content change within this tag, not outside it.
+						parentTags && parentTags[tag.tagName] === tag
+					)
+				) {
 					// Contents have changed so recreate $linkedElem for the radio input elements (including possible new one just inserted)
 					val = tag.cvtArgs()[0];
 					$linkedElem = tag.linkedElem = tag.contents(true, RADIOINPUT);
@@ -18494,11 +18523,19 @@ $tags({
 					tag.linkedElems = tagCtx.linkedElems = [$linkedElem];
 				}
 			});
+			tag._dmChg.tgt = domChngCntnr; // Used to remove listener in onUnbind
 		},
 		onAfterLink: function(tagCtx, linkCtx, ctx, ev, eventArgs) {
 			var propParams = tagCtx.params.props;
 			if (propParams && propParams.disabled) {
 				this.linkedElem.prop("disabled", !!tagCtx.props.disabled);
+			}
+		},
+		onUnbind: function() {
+			var tag = this;
+			if (tag._dmChg) {
+				$(tag._dmChg.tgt).off("jsv-domchange", tag._dmChg); // Remove listener
+				tag._dmChg = undefined;
 			}
 		},
 		onUpdate: false, // don't rerender
@@ -18514,32 +18551,41 @@ $tags({
 			var domChngCntnr,
 				tag = this,
 				tgCtxProps = tagCtx.params.props,
-				cvt = tgCtxProps && tgCtxProps.convert,
-				cvtBk = tgCtxProps && tgCtxProps.convertBack,
 				useDisable = tgCtxProps && tgCtxProps.disabled,
-				linkExpr = tagCtx.params.args[0] + (cvt ? " convert=" + cvt : "") + (cvtBk ? " convertBack=" + cvtBk : ""),
+				linkExpr = tagCtx.params.args[0],
 				$linkedElem = tag.contents(true, CHECKBOXINPUT),
 				l = $linkedElem.length;
 			while (l--) {
 				// Configure the name for each checkbox input element
 				$linkedElem[l].name = $linkedElem[l].name || tag.name;
+				$linkedElem[l]._jsvLkEl = tag;
 			}
-			$linkedElem.link(linkExpr, linkCtx.data);
-
-			// Establish a domchange listener in case this checkboxgroup wraps a {^{for}} or {^{if}} or similar which might dynamically insert new checkbox input elements
+			for (l in tgCtxProps) {
+				linkExpr += " " + l + "=" + tgCtxProps[l];
+			}
+			$linkedElem.link(linkExpr, linkCtx.data, undefined, undefined, linkCtx.view);
+			tag.linkedElem = $linkedElem;
 			if (tag.inline) {
-				// If the first element is owned by (rendered by) this tag (not by a childTag such as {^{for}}) use it as container for detecting dom changes
+				// If the first element is owned by (rendered by) this tag (not by a childTag such as {^{for}})
+				// use it as container for detecting dom changes
 				domChngCntnr = tag.contents("*")[0];
 				domChngCntnr = domChngCntnr && $.view(domChngCntnr).ctx.tag === tag.parent ? domChngCntnr : tag.parentElem;
 			} else {
 				domChngCntnr = linkCtx.elem;
 			}
-			$(domChngCntnr).on("jsv-domchange", function(ev, forOrIfTagCtx) {
+			// Establish a domchange listener in case this checkboxgroup wraps a {^{for}} or {^{if}} or similar
+			// which might dynamically insert new checkbox input elements
+			$(domChngCntnr).on("jsv-domchange", tag._dmChg = function(ev, forOrIfTagCtx, linkCtx, eventArgs) {
 				var linkedElem,
 					parentTags = forOrIfTagCtx.ctx.parentTags;
-				if (!tag.inline || domChngCntnr !== tag.parentElem // The domChngCntnr is specific to this tag
-					// The domChngCntnr is the parentElem of this tag, so need to make sure dom change event is for a content change within this tag, not outside it.
-					|| parentTags && parentTags[tag.tagName] === tag) {
+				if (!eventArgs.refresh &&
+					(!tag.inline ||
+						domChngCntnr !== tag.parentElem ||
+						// If the tag is inline, and the domChngCntnr is the parentElem, then we need to
+						// make sure dom change event is fora content change within this tag, not outside it.
+						parentTags && parentTags[tag.tagName] === tag
+					)
+				) {
 					// Contents have changed so recreate $linkedElem for the checkbox input elements (including possible new one just inserted)
 					$linkedElem = tag.contents(true, CHECKBOXINPUT);
 					l = $linkedElem.length;
@@ -18556,11 +18602,19 @@ $tags({
 					}
 				}
 			});
+			tag._dmChg.tgt = domChngCntnr; // Used to remove listener in onUnbind
 		},
 		onAfterLink: function(tagCtx, linkCtx, ctx, ev, eventArgs) {
 			var propParams = tagCtx.params.props;
 			if (propParams && propParams.disabled) {
 				this.contents(true, CHECKBOXINPUT).prop("disabled", !!tagCtx.props.disabled);
+			}
+		},
+		onUnbind: function() {
+			var tag = this;
+			if (tag._dmChg) {
+				$(tag._dmChg.tgt).off("jsv-domchange", tag._dmChg); // Remove listener
+				tag._dmChg = undefined;
 			}
 		},
 		onUpdate: false, // don't rerender
@@ -19082,7 +19136,7 @@ $sub._cp = function(paramVal, paramExpr, view, tagCtxPrm) { // Create tag or inl
 			var params = delimOpenChar1 + ":" + paramExpr + delimCloseChar0,
 				linkFn = linkExprStore[params];
 			if (!linkFn) {
-				linkExprStore[params] = linkFn = $sub.tmplFn(params, view.tmpl, true);
+				linkExprStore[params] = linkFn = $sub.tmplFn(params.replace(rEscapeQuotes, "\\$&"), view.tmpl, true);
 			}
 			paramVal = linkFn.deps[0]
 				? [view, linkFn] // compiled expression
@@ -19182,7 +19236,7 @@ $viewsSettings.advanced({
 return $;
 }, window));
 },{}],4:[function(require,module,exports){
-(function (global){
+(function (global){(function (){
 var tmplRefs = [],
   mkup = '<div>\n  <div class=\"title\">Title:</div>\n  <div><input value=\"{{:title}}\" data-link=\"^{:title trigger=true:}\" /></div>\n  <div class=\"title\">\n    Languages: <span id=\"addLanguage\">Add</span>\n  </div>\n{^{for languages tmpl=\'./templates/sub/movie-language.html\' /}}</div>',
   $ = global.jsrender || global.jQuery;
@@ -19197,9 +19251,9 @@ module.exports = $ ? $.templates("./templates/movie-detail.html", mkup) :
 
     return $.templates("./templates/movie-detail.html", mkup)
   };
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+}).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./sub/movie-language.html":6}],5:[function(require,module,exports){
-(function (global){
+(function (global){(function (){
 var tmplRefs = [],
   mkup = '{^{for movies}}\n  <tr class=\"hover\" style=\"background-color:{{:~bgColor()}};\" data-link=\"css-background-color^{:~bgColor()}\">\n    <td>{^{:#index + 1}}: {^{>title}}</td>\n    <td>{^{for languages}}<div>{^{>name}}</div>{{/for}}</td>\n    <td><span class=\"removeMovie\"></span></td>\n  </tr>\n{{/for}}',
   $ = global.jsrender || global.jQuery;
@@ -19213,9 +19267,9 @@ module.exports = $ ? $.templates("./templates/movie-list.html", mkup) :
 
     return $.templates("./templates/movie-list.html", mkup)
   };
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+}).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],6:[function(require,module,exports){
-(function (global){
+(function (global){(function (){
 var tmplRefs = [],
   mkup = '<input value=\"{{:name}}\" data-link=\"^{:name trigger=true:}\" /><span class=\"removeLanguage\"></span>\n',
   $ = global.jsrender || global.jQuery;
@@ -19229,5 +19283,5 @@ module.exports = $ ? $.templates("./templates/sub/movie-language.html", mkup) :
 
     return $.templates("./templates/sub/movie-language.html", mkup)
   };
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+}).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}]},{},[1]);
