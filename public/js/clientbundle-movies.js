@@ -105,7 +105,7 @@ $.link(true, ".movieApp", app); // Data-link all the content that was already se
 // the layoutlayout-movies template (server-side only) plus the movie-list template that is also used client-side to render any added rows.
 
 },{"../templates/movie-detail.html":3,"../templates/movie-list.html":4,"jsviews":2}],2:[function(require,module,exports){
-/*! jsviews.js v1.0.8 single-file version: http://jsviews.com/ */
+/*! jsviews.js v1.0.9 single-file version: http://jsviews.com/ */
 /*! includes JsRender, JsObservable and JsViews - see: http://jsviews.com/#download */
 
 /* Interactive data-driven views using JsRender templates */
@@ -154,7 +154,7 @@ if (!$ || !$.fn) {
 	throw "JsViews requires jQuery"; // We require jQuery
 }
 
-var versionNumber = "v1.0.8",
+var versionNumber = "v1.0.9",
 
 	jsvStoreName, rTag, rTmplString, topView, $views, $observe, $observable, $expando,
 	_ocp = "_ocp",      // Observable contextual parameter

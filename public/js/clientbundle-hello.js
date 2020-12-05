@@ -10902,7 +10902,7 @@ return jQuery;
 } );
 
 },{}],3:[function(require,module,exports){
-/*! JsRender v1.0.8: http://jsviews.com/#jsrender */
+/*! JsRender v1.0.9: http://jsviews.com/#jsrender */
 /*! **VERSION FOR WEB** (For NODE.JS see http://jsviews.com/download/jsrender-node.js) */
 /*
  * Best-of-breed templating in browser or on Node.js.
@@ -10948,7 +10948,7 @@ var setGlobals = $ === false; // Only set globals if script block in browser (no
 
 $ = $ && $.fn ? $ : global.jQuery; // $ is jQuery passed in by CommonJS loader (Browserify), or global jQuery.
 
-var versionNumber = "v1.0.8",
+var versionNumber = "v1.0.9",
 	jsvStoreName, rTag, rTmplString, topView, $views, $expando,
 	_ocp = "_ocp",      // Observable contextual parameter
 
