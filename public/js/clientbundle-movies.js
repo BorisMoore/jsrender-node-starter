@@ -105,7 +105,7 @@ $.link(true, ".movieApp", app); // Data-link all the content that was already se
 // the layoutlayout-movies template (server-side only) plus the movie-list template that is also used client-side to render any added rows.
 
 },{"../templates/movie-detail.html":3,"../templates/movie-list.html":4,"jsviews":2}],2:[function(require,module,exports){
-/*! jsviews.js v1.0.11 single-file version: http://jsviews.com/ */
+/*! jsviews.js v1.0.12 single-file version: http://jsviews.com/ */
 /*! includes JsRender, JsObservable and JsViews - see: http://jsviews.com/#download */
 
 /* Interactive data-driven views using JsRender templates */
@@ -154,7 +154,7 @@ if (!$ || !$.fn) {
 	throw "JsViews requires jQuery"; // We require jQuery
 }
 
-var versionNumber = "v1.0.11",
+var versionNumber = "v1.0.12",
 
 	jsvStoreName, rTag, rTmplString, topView, $views, $observe, $observable, $expando,
 	_ocp = "_ocp",      // Observable contextual parameter
@@ -194,6 +194,7 @@ var versionNumber = "v1.0.11",
 		lt: "<"
 	},
 	HTML = "html",
+	STRING = "string",
 	OBJECT = "object",
 	tmplAttr = "data-jsv-tmpl",
 	jsvTmpl = "jsvTmpl",
@@ -701,7 +702,7 @@ function convertArgs(tagElse, bound) { // tag.cvtArgs() or tag.cvtArgs(tagElse?,
 	bindFrom = tag.bindFrom;
 	args = tagCtx.args;
 
-	if ((converter = tag.convert) && "" + converter === converter) {
+	if ((converter = tag.convert) && typeof converter === STRING) {
 		converter = converter === "true"
 			? undefined
 			: (tagCtx.view.getRsc("converters", converter) || error("Unknown converter: '" + converter + "'"));
@@ -764,7 +765,7 @@ function convertBoundArgs(tagElse) { // tag.bndArgs()
 function getResource(resourceType, itemName) {
 	var res, store,
 		view = this;
-	if ("" + itemName === itemName) {
+	if (typeof itemName === STRING) {
 		while ((res === undefined) && view) {
 			store = view.tmpl && view.tmpl[resourceType];
 			res = store && store[itemName];
@@ -1163,13 +1164,13 @@ function compileTag(name, tagDef, parentTmpl) {
 			depends: tagDef.depends,
 			render: tagDef
 		};
-	} else if ("" + tagDef === tagDef) {
+	} else if (typeof tagDef === STRING) {
 		tagDef = {template: tagDef};
 	}
 
 	if (baseTag = tagDef.baseTag) {
 		tagDef.flow = !!tagDef.flow; // Set flow property, so defaults to false even if baseTag has flow=true
-		baseTag = "" + baseTag === baseTag
+		baseTag = typeof baseTag === STRING
 			? (parentTmpl && parentTmpl.tags[baseTag] || $tags[baseTag])
 			: baseTag;
 		if (!baseTag) {
@@ -1186,7 +1187,7 @@ function compileTag(name, tagDef, parentTmpl) {
 
 	// Tag declared as object, used as the prototype for tag instantiation (control/presenter)
 	if ((tmpl = compiledDef.template) !== undefined) {
-		compiledDef.template = "" + tmpl === tmpl ? ($templates[tmpl] || $templates(tmpl)) : tmpl;
+		compiledDef.template = typeof tmpl === STRING ? ($templates[tmpl] || $templates(tmpl)) : tmpl;
 	}
 	(Tag.prototype = compiledDef).constructor = compiledDef._ctr = Tag;
 
@@ -1214,7 +1215,7 @@ function compileTmpl(name, tmpl, parentTmpl, options) {
 		// If value is of type string - treat as selector, or name of compiled template
 		// Return the template object, if already compiled, or the markup string
 		var currentName, tmpl;
-		if (("" + value === value) || value.nodeType > 0 && (elem = value)) {
+		if ((typeof value === STRING) || value.nodeType > 0 && (elem = value)) {
 			if (!elem) {
 				if (/^\.?\/[^\\:*?"<>]*$/.test(value)) {
 					// value="./some/file.html" (or "/some/file.html")
@@ -1378,7 +1379,7 @@ function compileViewModel(name, type) {
 		for (; j < getterCount; j++) {
 			prop = getters[j];
 			getterType = undefined;
-			if (prop + "" !== prop) {
+			if (typeof prop !== STRING) {
 				getterType = prop;
 				prop = getterType.getter;
 				parentRef = getterType.parentRef;
@@ -1391,7 +1392,7 @@ function compileViewModel(name, type) {
 	}
 
 	function map(data) {
-		data = data + "" === data
+		data = typeof data === STRING
 			? JSON.parse(data) // Accept JSON string
 			: data;            // or object/array
 		var l, prop, childOb, parentRef,
@@ -1444,7 +1445,7 @@ function compileViewModel(name, type) {
 	}
 
 	function merge(data, parent, parentRef) {
-		data = data + "" === data
+		data = typeof data === STRING
 			? JSON.parse(data) // Accept JSON string
 			: data;            // or object/array
 
@@ -1467,7 +1468,7 @@ function compileViewModel(name, type) {
 					mod = model[j];
 
 					if (id) {
-						assigned[j] = found = id + "" === id
+						assigned[j] = found = typeof id === STRING
 						? (ob[id] && (getterNames[id] ? mod[id]() : mod[id]) === ob[id])
 						: id(mod, ob);
 					}
@@ -1525,7 +1526,7 @@ function compileViewModel(name, type) {
 		for (; k < getterCount; k++) {
 			prop = getters[k];
 			getterType = undefined;
-			if (prop + "" !== prop) {
+			if (typeof prop !== STRING) {
 				getterType = prop;
 				prop = getterType.getter;
 			}
@@ -1666,7 +1667,7 @@ function registerStore(storeName, storeSettings) {
 			return item || $views;
 		}
 		// Adding a single unnamed item to the store
-		if (name && "" + name !== name) { // name must be a string
+		if (name &&  typeof name !== STRING) { // name must be a string
 			parentTmpl = item;
 			item = name;
 			name = undefined;
@@ -2198,7 +2199,7 @@ function tmplFn(markup, tmpl, isLinkExpr, convertBack, hasElse) {
 	pushprecedingContent(markup.length);
 
 	if (loc = astTop[astTop.length - 1]) {
-		blockTagCheck("" + loc !== loc && (+loc[10] === loc[10]) && loc[0]);
+		blockTagCheck(typeof loc !== STRING && (+loc[10] === loc[10]) && loc[0]);
 	}
 //			result = tmplFnsCache[markup] = buildCode(astTop, tmpl);
 //		}
@@ -2540,7 +2541,7 @@ function buildCode(ast, tmpl, isLinkExpr) {
 		tmplOptions = {},
 		l = ast.length;
 
-	if ("" + tmpl === tmpl) {
+	if (typeof tmpl === STRING) {
 		tmplName = isLinkExpr ? 'data-link="' + tmpl.replace(rNewLine, " ").slice(1, -1) + '"' : tmpl;
 		tmpl = 0;
 	} else {
@@ -2559,7 +2560,7 @@ function buildCode(ast, tmpl, isLinkExpr) {
 		node = ast[i];
 
 		// Add newline for each callout to t() c() etc. and each markup string
-		if ("" + node === node) {
+		if (typeof node === STRING) {
 			// a markup string to be inserted
 			code += '+"' + node + '"';
 		} else {
@@ -2779,11 +2780,11 @@ function getTargetSorted(value, tagCtx) {
 	if (!$isArray(value)) {
 		return value;
 	}
-	if (directSort || sort && "" + sort === sort) {
+	if (directSort || sort && typeof sort === STRING) {
 		// Temporary mapped array holds objects with index and sort-value
 		mapped = value.map(function(item, i) {
 			item = directSort ? item : getPathObject(item, sort);
-			return {i: i, v: "" + item === item ? item.toLowerCase() : item};
+			return {i: i, v: typeof item === STRING ? item.toLowerCase() : item};
 		});
 		// Sort mapped array
 		mapped.sort(function(a, b) {
@@ -2882,12 +2883,12 @@ function htmlEncode(text) {
 
 function dataEncode(text) {
 	// Encode just < > and & - intended for 'safe data' along with {{:}} rather than {{>}}
-  return "" + text === text ? text.replace(rDataEncode, getCharEntity) : text;
+  return typeof text === STRING ? text.replace(rDataEncode, getCharEntity) : text;
 }
 
 function dataUnencode(text) {
   // Unencode just < > and & - intended for 'safe data' along with {{:}} rather than {{>}}
-  return "" + text === text ? text.replace(rDataUnencode, getCharFromEntity) : text;
+  return  typeof text === STRING ? text.replace(rDataUnencode, getCharFromEntity) : text;
 }
 
 //========================== Initialize ==========================
@@ -2991,7 +2992,7 @@ if (!$.link) {
 			: (
 				$subSettings._clFns && $subSettings._clFns(), // Clear linkExprStore (cached compiled expressions), since debugMode setting affects compilation for expressions
 				$subSettings.debugMode = debugMode,
-				$subSettings.onError = debugMode + "" === debugMode
+				$subSettings.onError = typeof debugMode === STRING
 					? function() { return debugMode; }
 					: $isFunction(debugMode)
 						? debugMode
@@ -3209,7 +3210,7 @@ if (!$.observe) {
 						: root; // rt = root = current data context of computed prop
 				out = out.concat(dependsPaths(path.call(root, rt, callback), rt, callback));
 				continue;
-			} else if ("" + path !== path) {
+			} else if (typeof path !== STRING) {
 				root = nextObj = path = (path === undefined ? null : path);
 				if (nextObj !== object) {
 					out.push(object = nextObj);
@@ -3581,7 +3582,7 @@ if (!$.observe) {
 						}
 
 						while ((prop = prts.shift()) !== undefined) {
-							if (obj && typeof obj === OBJECT && "" + prop === prop) {
+							if (obj && typeof obj === OBJECT && typeof prop === STRING) {
 								if (prop === "") {
 									continue;
 								}
@@ -3730,7 +3731,7 @@ if (!$.observe) {
 							allowArray += path._ar; // Switch on allowArray for depends paths, and off, afterwards.
 							continue;
 						}
-						if ("" + path === path) {
+						if (typeof path === STRING) {
 							parts = path.split("^");
 							if (parts[1]) {
 								// We bind the leaf, plus additional nodes based on depth.
@@ -3753,7 +3754,7 @@ if (!$.observe) {
 											continue;
 										}
 									}
-									if (pth + "" === pth) {
+									if (typeof pth === STRING) {
 										observePath(ob, pth.split("."));
 									} else {
 										observeObjectPaths(items.shift(), items, callback, contextCb);
@@ -3792,7 +3793,7 @@ if (!$.observe) {
 					l = paths.length;
 				while (l--) { // Step backwards through paths and objects
 					pth = paths[l];
-					if (pth + "" === pth || pth && (pth._ar || pth._cpfn)) {
+					if (typeof pth === STRING || pth && (pth._ar || pth._cpfn)) {
 						pths.unshift(pth); // This is a path so add to arr
 					} else { // This is an object
 						observeObjectPaths(pth, pths, callback, contextCb);
@@ -3811,7 +3812,7 @@ if (!$.observe) {
 				lastArg = paths.pop() || false,
 				m = paths.length;
 
-			if (lastArg + "" === lastArg) { // If last arg is a string then this observe call is part of an observeAll call,
+			if (typeof lastArg === STRING) { // If last arg is a string then this observe call is part of an observeAll call,
 				allPath = lastArg;            // and the last three args are the parentObs array, the filter, and the allPath string.
 				parentObs = paths.pop();
 				filter = paths.pop();
@@ -3821,7 +3822,7 @@ if (!$.observe) {
 			if (lastArg === !!lastArg) {
 				unobserve = lastArg;
 				lastArg = paths[m-1];
-				lastArg = m && lastArg + "" !== lastArg && (!lastArg || $isFunction(lastArg)) ? (m--, paths.pop()) : undefined;
+				lastArg = m && typeof lastArg !== STRING && (!lastArg || $isFunction(lastArg)) ? (m--, paths.pop()) : undefined;
 				if (unobserve && !m && $isFunction(paths[0])) {
 					lastArg = paths.shift();
 				}
@@ -3881,7 +3882,7 @@ if (!$.observe) {
 			paths = slice.call(arguments),
 			pth = paths[0];
 
-		if (pth + "" === pth) {
+		if (typeof pth === STRING) {
 			initialNs = pth; // The first arg is a namespace, since it is a string
 			paths.shift();
 		}
@@ -3899,7 +3900,7 @@ if (!$.observe) {
 	};
 
 	$observable = function(ns, data, delay) {
-		if (ns + "" !== ns) {
+		if (typeof ns !== STRING) {
 			delay = data;
 			data = ns;
 			ns = "";
@@ -3960,7 +3961,7 @@ if (!$.observe) {
 		setProperty: function(path, value, nonStrict, isCpfn) {
 			path = path || "";
 			var key, pair, parts, tempBatch,
-				multi = path + "" !== path, // Hash of paths
+				multi = typeof path !== STRING, // Hash of paths
 				self = this,
 				object = self._data,
 				batch = self._batch;
@@ -4433,6 +4434,7 @@ $converters = $views.converters;
 $.templates = $templates = $views.templates;
 $tags = $views.tags;
 rFirstElem = /<(?!script)(\w+)[>\s]/;
+STRING = "string";
 
 if ($.link) { return $; } // JsViews is already loaded
 
@@ -4592,7 +4594,7 @@ function updateValues(sourceValues, tagElse, async, bindId, ev) {
 
 		while (l--) {
 			if (to = tos[l]) {
-				to = to + "" === to ? [linkCtx.data, to] : to; // [object, path]
+				to = typeof to === STRING ? [linkCtx.data, to] : to; // [object, path]
 				target = to[0];
 				tcpTag = to.tag; // If this is a tag contextual parameter - the owner tag
 				sourceValue = (target && target._ocp && !target._vw
@@ -5363,7 +5365,7 @@ function $link(tmplOrLinkExpr, to, from, context, noIteration, parentView, prevN
 			targetEl = to[l];
 
 			prntView = parentView || $view(targetEl);
-			if ("" + tmplOrLinkExpr === tmplOrLinkExpr) {
+			if (typeof tmplOrLinkExpr === STRING) {
 				// tmplOrLinkExpr is a string: treat as data-link expression.
 				addDataBinding(late = [], tmplOrLinkExpr, targetEl, prntView, undefined, "expr", from, context);
 			} else {
@@ -5926,7 +5928,7 @@ function viewLink(outerData, parentNode, prevNode, nextNode, html, refresh, cont
 	}
 
 	parentNode = parentNode
-		? ("" + parentNode === parentNode
+		? (typeof parentNode === STRING
 			? $(parentNode)[0]  // It is a string, so treat as selector
 			: parentNode.jquery
 				? parentNode[0]   // A jQuery object - take first element.
@@ -6181,7 +6183,7 @@ function removeSubStr(str, substr) {
 
 function markerNodeInfo(node) {
 	return node &&
-		("" + node === node
+		(typeof node === STRING
 			? node
 			: node.tagName === SCRIPT
 				? node.type.slice(3)
@@ -6452,7 +6454,7 @@ function bindTriggerEvent($elem, trig, onoff) {
 	if (trig === true && useInput && (!isIE || $elem[0].contentEditable !== TRUE)) { // IE oninput event is not raised for contenteditable changes
 		$elem[onoff]("input.jsv", onElemChange); // For HTML5 browser with "oninput" support - for mouse editing of text
 	} else {
-		trig = "" + trig === trig ? trig : "keydown.jsv"; // Set trigger to (true || truey non-string (e.g. 1) || 'keydown')
+		trig = typeof trig === STRING ? trig : "keydown.jsv"; // Set trigger to (true || truey non-string (e.g. 1) || 'keydown')
 		$elem[onoff](trig, trig.indexOf("keydown") >= 0 ? asyncOnElemChange : onElemChange); // Get 'keydown' with async
 	}
 }
@@ -7078,7 +7080,7 @@ function addLinkMethods(tagOrView) { // tagOrView is View prototype or tag insta
 			l = bindFrom.length;
 			while (l--) {
 				key = bindFrom[l];
-				if (key + "" === key) {
+				if (typeof key === STRING) {
 					bindFrom[key] = 1;
 					if ($inArray(key, boundProps) < 0) {
 						boundProps.push(key); // Add any 'bindFrom' props to boundProps array. (So two-way binding works without writing ^foo=expression)
@@ -8028,7 +8030,7 @@ $extend($, {
 		if (node && node !== body && topView._.useKey > 1) {
 			// Perf optimization for common cases
 
-			node = "" + node === node
+			node = typeof node === STRING
 				? $(node)[0]
 				: node.jquery
 					? node[0]

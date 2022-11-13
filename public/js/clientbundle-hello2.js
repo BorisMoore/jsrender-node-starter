@@ -28,7 +28,7 @@ document.getElementById("incrementBtn").onclick = incrementWorld;
 incrementWorld();
 
 },{"../templates/hello-detail.html":3,"jsrender":2}],2:[function(require,module,exports){
-/*! JsRender v1.0.11: http://jsviews.com/#jsrender */
+/*! JsRender v1.0.12: http://jsviews.com/#jsrender */
 /*! **VERSION FOR WEB** (For NODE.JS see http://jsviews.com/download/jsrender-node.js) */
 /*
  * Best-of-breed templating in browser or on Node.js.
@@ -74,7 +74,7 @@ var setGlobals = $ === false; // Only set globals if script block in browser (no
 
 $ = $ && $.fn ? $ : global.jQuery; // $ is jQuery passed in by CommonJS loader (Browserify), or global jQuery.
 
-var versionNumber = "v1.0.11",
+var versionNumber = "v1.0.12",
 	jsvStoreName, rTag, rTmplString, topView, $views, $expando,
 	_ocp = "_ocp",      // Observable contextual parameter
 
@@ -113,6 +113,7 @@ var versionNumber = "v1.0.11",
 		lt: "<"
 	},
 	HTML = "html",
+	STRING = "string",
 	OBJECT = "object",
 	tmplAttr = "data-jsv-tmpl",
 	jsvTmpl = "jsvTmpl",
@@ -620,7 +621,7 @@ function convertArgs(tagElse, bound) { // tag.cvtArgs() or tag.cvtArgs(tagElse?,
 	bindFrom = tag.bindFrom;
 	args = tagCtx.args;
 
-	if ((converter = tag.convert) && "" + converter === converter) {
+	if ((converter = tag.convert) && typeof converter === STRING) {
 		converter = converter === "true"
 			? undefined
 			: (tagCtx.view.getRsc("converters", converter) || error("Unknown converter: '" + converter + "'"));
@@ -683,7 +684,7 @@ function convertBoundArgs(tagElse) { // tag.bndArgs()
 function getResource(resourceType, itemName) {
 	var res, store,
 		view = this;
-	if ("" + itemName === itemName) {
+	if (typeof itemName === STRING) {
 		while ((res === undefined) && view) {
 			store = view.tmpl && view.tmpl[resourceType];
 			res = store && store[itemName];
@@ -1082,13 +1083,13 @@ function compileTag(name, tagDef, parentTmpl) {
 			depends: tagDef.depends,
 			render: tagDef
 		};
-	} else if ("" + tagDef === tagDef) {
+	} else if (typeof tagDef === STRING) {
 		tagDef = {template: tagDef};
 	}
 
 	if (baseTag = tagDef.baseTag) {
 		tagDef.flow = !!tagDef.flow; // Set flow property, so defaults to false even if baseTag has flow=true
-		baseTag = "" + baseTag === baseTag
+		baseTag = typeof baseTag === STRING
 			? (parentTmpl && parentTmpl.tags[baseTag] || $tags[baseTag])
 			: baseTag;
 		if (!baseTag) {
@@ -1105,7 +1106,7 @@ function compileTag(name, tagDef, parentTmpl) {
 
 	// Tag declared as object, used as the prototype for tag instantiation (control/presenter)
 	if ((tmpl = compiledDef.template) !== undefined) {
-		compiledDef.template = "" + tmpl === tmpl ? ($templates[tmpl] || $templates(tmpl)) : tmpl;
+		compiledDef.template = typeof tmpl === STRING ? ($templates[tmpl] || $templates(tmpl)) : tmpl;
 	}
 	(Tag.prototype = compiledDef).constructor = compiledDef._ctr = Tag;
 
@@ -1133,7 +1134,7 @@ function compileTmpl(name, tmpl, parentTmpl, options) {
 		// If value is of type string - treat as selector, or name of compiled template
 		// Return the template object, if already compiled, or the markup string
 		var currentName, tmpl;
-		if (("" + value === value) || value.nodeType > 0 && (elem = value)) {
+		if ((typeof value === STRING) || value.nodeType > 0 && (elem = value)) {
 			if (!elem) {
 				if (/^\.?\/[^\\:*?"<>]*$/.test(value)) {
 					// value="./some/file.html" (or "/some/file.html")
@@ -1297,7 +1298,7 @@ function compileViewModel(name, type) {
 		for (; j < getterCount; j++) {
 			prop = getters[j];
 			getterType = undefined;
-			if (prop + "" !== prop) {
+			if (typeof prop !== STRING) {
 				getterType = prop;
 				prop = getterType.getter;
 				parentRef = getterType.parentRef;
@@ -1310,7 +1311,7 @@ function compileViewModel(name, type) {
 	}
 
 	function map(data) {
-		data = data + "" === data
+		data = typeof data === STRING
 			? JSON.parse(data) // Accept JSON string
 			: data;            // or object/array
 		var l, prop, childOb, parentRef,
@@ -1363,7 +1364,7 @@ function compileViewModel(name, type) {
 	}
 
 	function merge(data, parent, parentRef) {
-		data = data + "" === data
+		data = typeof data === STRING
 			? JSON.parse(data) // Accept JSON string
 			: data;            // or object/array
 
@@ -1386,7 +1387,7 @@ function compileViewModel(name, type) {
 					mod = model[j];
 
 					if (id) {
-						assigned[j] = found = id + "" === id
+						assigned[j] = found = typeof id === STRING
 						? (ob[id] && (getterNames[id] ? mod[id]() : mod[id]) === ob[id])
 						: id(mod, ob);
 					}
@@ -1444,7 +1445,7 @@ function compileViewModel(name, type) {
 		for (; k < getterCount; k++) {
 			prop = getters[k];
 			getterType = undefined;
-			if (prop + "" !== prop) {
+			if (typeof prop !== STRING) {
 				getterType = prop;
 				prop = getterType.getter;
 			}
@@ -1585,7 +1586,7 @@ function registerStore(storeName, storeSettings) {
 			return item || $views;
 		}
 		// Adding a single unnamed item to the store
-		if (name && "" + name !== name) { // name must be a string
+		if (name &&  typeof name !== STRING) { // name must be a string
 			parentTmpl = item;
 			item = name;
 			name = undefined;
@@ -2117,7 +2118,7 @@ function tmplFn(markup, tmpl, isLinkExpr, convertBack, hasElse) {
 	pushprecedingContent(markup.length);
 
 	if (loc = astTop[astTop.length - 1]) {
-		blockTagCheck("" + loc !== loc && (+loc[10] === loc[10]) && loc[0]);
+		blockTagCheck(typeof loc !== STRING && (+loc[10] === loc[10]) && loc[0]);
 	}
 //			result = tmplFnsCache[markup] = buildCode(astTop, tmpl);
 //		}
@@ -2459,7 +2460,7 @@ function buildCode(ast, tmpl, isLinkExpr) {
 		tmplOptions = {},
 		l = ast.length;
 
-	if ("" + tmpl === tmpl) {
+	if (typeof tmpl === STRING) {
 		tmplName = isLinkExpr ? 'data-link="' + tmpl.replace(rNewLine, " ").slice(1, -1) + '"' : tmpl;
 		tmpl = 0;
 	} else {
@@ -2478,7 +2479,7 @@ function buildCode(ast, tmpl, isLinkExpr) {
 		node = ast[i];
 
 		// Add newline for each callout to t() c() etc. and each markup string
-		if ("" + node === node) {
+		if (typeof node === STRING) {
 			// a markup string to be inserted
 			code += '+"' + node + '"';
 		} else {
@@ -2698,11 +2699,11 @@ function getTargetSorted(value, tagCtx) {
 	if (!$isArray(value)) {
 		return value;
 	}
-	if (directSort || sort && "" + sort === sort) {
+	if (directSort || sort && typeof sort === STRING) {
 		// Temporary mapped array holds objects with index and sort-value
 		mapped = value.map(function(item, i) {
 			item = directSort ? item : getPathObject(item, sort);
-			return {i: i, v: "" + item === item ? item.toLowerCase() : item};
+			return {i: i, v: typeof item === STRING ? item.toLowerCase() : item};
 		});
 		// Sort mapped array
 		mapped.sort(function(a, b) {
@@ -2801,12 +2802,12 @@ function htmlEncode(text) {
 
 function dataEncode(text) {
 	// Encode just < > and & - intended for 'safe data' along with {{:}} rather than {{>}}
-  return "" + text === text ? text.replace(rDataEncode, getCharEntity) : text;
+  return typeof text === STRING ? text.replace(rDataEncode, getCharEntity) : text;
 }
 
 function dataUnencode(text) {
   // Unencode just < > and & - intended for 'safe data' along with {{:}} rather than {{>}}
-  return "" + text === text ? text.replace(rDataUnencode, getCharFromEntity) : text;
+  return  typeof text === STRING ? text.replace(rDataUnencode, getCharFromEntity) : text;
 }
 
 //========================== Initialize ==========================
@@ -2910,7 +2911,7 @@ if (!(jsr || $ && $.render)) {
 			: (
 				$subSettings._clFns && $subSettings._clFns(), // Clear linkExprStore (cached compiled expressions), since debugMode setting affects compilation for expressions
 				$subSettings.debugMode = debugMode,
-				$subSettings.onError = debugMode + "" === debugMode
+				$subSettings.onError = typeof debugMode === STRING
 					? function() { return debugMode; }
 					: $isFunction(debugMode)
 						? debugMode
