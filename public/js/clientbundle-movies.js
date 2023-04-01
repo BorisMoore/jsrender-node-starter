@@ -105,7 +105,7 @@ $.link(true, ".movieApp", app); // Data-link all the content that was already se
 // the layoutlayout-movies template (server-side only) plus the movie-list template that is also used client-side to render any added rows.
 
 },{"../templates/movie-detail.html":3,"../templates/movie-list.html":4,"jsviews":2}],2:[function(require,module,exports){
-/*! jsviews.js v1.0.12 single-file version: http://jsviews.com/ */
+/*! jsviews.js v1.0.13 single-file version: http://jsviews.com/ */
 /*! includes JsRender, JsObservable and JsViews - see: http://jsviews.com/#download */
 
 /* Interactive data-driven views using JsRender templates */
@@ -113,7 +113,7 @@ $.link(true, ".movieApp", app); // Data-link all the content that was already se
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< JsRender >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 /* JsRender:
  * See http://jsviews.com/#jsrender and http://github.com/BorisMoore/jsrender
- * Copyright 2021, Boris Moore
+ * Copyright 2023, Boris Moore
  * Released under the MIT License.
  */
 
@@ -154,7 +154,7 @@ if (!$ || !$.fn) {
 	throw "JsViews requires jQuery"; // We require jQuery
 }
 
-var versionNumber = "v1.0.12",
+var versionNumber = "v1.0.13",
 
 	jsvStoreName, rTag, rTmplString, topView, $views, $observe, $observable, $expando,
 	_ocp = "_ocp",      // Observable contextual parameter
@@ -1229,7 +1229,7 @@ function compileTmpl(name, tmpl, parentTmpl, options) {
 					}
 				} else if (value.charAt(0) === "#") {
 					elem = document.getElementById(value.slice(1));
-				} else if ($.fn && !$sub.rTmpl.test(value)) {
+				} if (!elem && $.fn && !$sub.rTmpl.test(value)) {
 					try {
 						elem = $(value, document)[0]; // if jQuery is loaded, test for selector returning elements, and get first element
 					} catch (e) {}
@@ -3132,7 +3132,7 @@ if (jsrToJq) { // Moving from jsrender namespace to jQuery namepace - copy over 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< JsObservable >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 /* JsObservable:
  * See https://www.jsviews.com/#jsobservable and http://github.com/borismoore/jsviews
- * Copyright 2021, Boris Moore
+ * Copyright 2023, Boris Moore
  * Released under the MIT License.
  */
 
@@ -4421,7 +4421,7 @@ if (!$.observe) {
 /* JsViews:
  * Interactive data-driven views using templates and data-linking.
  * See https://www.jsviews.com/#jsviews and http://github.com/BorisMoore/jsviews
- * Copyright 2021, Boris Moore
+ * Copyright 2023, Boris Moore
  * Released under the MIT License.
  */
 

@@ -28,7 +28,7 @@ document.getElementById("incrementBtn").onclick = incrementWorld;
 incrementWorld();
 
 },{"../templates/hello-detail.html":3,"jsrender":2}],2:[function(require,module,exports){
-/*! JsRender v1.0.12: http://jsviews.com/#jsrender */
+/*! JsRender v1.0.13: http://jsviews.com/#jsrender */
 /*! **VERSION FOR WEB** (For NODE.JS see http://jsviews.com/download/jsrender-node.js) */
 /*
  * Best-of-breed templating in browser or on Node.js.
@@ -74,7 +74,7 @@ var setGlobals = $ === false; // Only set globals if script block in browser (no
 
 $ = $ && $.fn ? $ : global.jQuery; // $ is jQuery passed in by CommonJS loader (Browserify), or global jQuery.
 
-var versionNumber = "v1.0.12",
+var versionNumber = "v1.0.13",
 	jsvStoreName, rTag, rTmplString, topView, $views, $expando,
 	_ocp = "_ocp",      // Observable contextual parameter
 
@@ -1148,7 +1148,7 @@ function compileTmpl(name, tmpl, parentTmpl, options) {
 					}
 				} else if (value.charAt(0) === "#") {
 					elem = document.getElementById(value.slice(1));
-				} else if ($.fn && !$sub.rTmpl.test(value)) {
+				} if (!elem && $.fn && !$sub.rTmpl.test(value)) {
 					try {
 						elem = $(value, document)[0]; // if jQuery is loaded, test for selector returning elements, and get first element
 					} catch (e) {}
