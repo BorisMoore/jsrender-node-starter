@@ -8,8 +8,6 @@ It also shows how to store *JsRender* templates on the file system on the server
 
 Accessing server-defined templates in the browser can be facilitated by using *[Browserify](https://browserify.org/)*, with the *JsRender* `tmplify` *Browserify transform*, or by using the `{{clientTemplate}}` tag when rendering the server page. 
 
-This app has been deployed to *[Heroku](https://www.heroku.com/)* (using the *index-express.js* script as start script) [here](https://jsrender-node-starter.herokuapp.com/).
-
 **Documentation and APIs:** see *[JsRender Node.js Quickstart](https://www.jsviews.com/#jsr-node-quickstart)* and *[JsRender for Node.js](http://www.jsviews.com/#jsrnode)*.
 
 ### Install
@@ -171,11 +169,12 @@ For details see the documentation topic *[JsRender Browserify support in Node.js
 
 ### Deploying this app to Heroku
 
-This app has been deployed to https://jsrender-node-starter.herokuapp.com/
+This app was deployed to Heroku, at https://jsrender-node-starter.herokuapp.com/, though this is not currently functioning (since Heroku withdrew its Free Product Plans...)
 
-You can deploy your own copy as follows:
+You can deploy your own copy along the lines of the following code:
 
 Make sure you have *[Node.js](https://nodejs.org/)* and the *[Heroku Toolbelt](https://toolbelt.heroku.com/)* installed.
+You may need to set a remote "heroku" target URL in .git/config
 
 ```bash
 $ git clone git@github.com:BorisMoore/jsrender-node-starter.git
