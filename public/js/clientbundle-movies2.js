@@ -11075,7 +11075,7 @@ return jQuery;
 } );
 
 },{}],3:[function(require,module,exports){
-/*! jsviews.js v1.0.14 single-file version: http://jsviews.com/ */
+/*! jsviews.js v1.0.16 single-file version: http://jsviews.com/ */
 /*! includes JsRender, JsObservable and JsViews - see: http://jsviews.com/#download */
 
 /* Interactive data-driven views using JsRender templates */
@@ -11083,7 +11083,7 @@ return jQuery;
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< JsRender >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 /* JsRender:
  * See http://jsviews.com/#jsrender and http://github.com/BorisMoore/jsrender
- * Copyright 2024, Boris Moore
+ * Copyright 2025, Boris Moore
  * Released under the MIT License.
  */
 
@@ -11124,14 +11124,14 @@ if (!$ || !$.fn) {
 	throw "JsViews requires jQuery"; // We require jQuery
 }
 
-var versionNumber = "v1.0.14",
+var versionNumber = "v1.0.16",
 
 	jsvStoreName, rTag, rTmplString, topView, $views, $observe, $observable, $expando,
 	_ocp = "_ocp",      // Observable contextual parameter
-
-	$isFunction, $isArray, $templates, $converters, $helpers, $tags, $sub, $subSettings, $subSettingsAdvanced, $viewsSettings,
+	$isFunction = function(ob) { return typeof ob === "function"; },
+	$isArray = Array.isArray,
+	$templates, $converters, $helpers, $tags, $sub, $subSettings, $subSettingsAdvanced, $viewsSettings,
 	delimOpenChar0, delimOpenChar1, delimCloseChar0, delimCloseChar1, linkChar, setting, baseOnError,
-
 	isRenderCall,
 	rNewLine = /[ \t]*(\r\n|\n|\r)/g,
 	rUnescapeQuotes = /\\(['"\\])/g, // Unescape quotes and trim
@@ -11321,7 +11321,9 @@ function JsViewsError(message) {
 function $extend(target, source) {
 	if (target) {
 		for (var name in source) {
-			target[name] = source[name];
+			if (name !== "__proto__") { // Prevent prototype pollution attacks
+				target[name] = source[name];
+			}
 		}
 		return target;
 	}
@@ -11354,7 +11356,7 @@ function $viewsDelimiters(openChars, closeChars, link) {
 	if (!openChars) {
 		return $subSettings.delimiters;
 	}
-	if ($isArray(openChars)) {
+	if (Array.isArray(openChars)) {
 		return $viewsDelimiters.apply($views, openChars);
 	}
 	linkChar = link ? link[0] : linkChar;
@@ -11476,6 +11478,9 @@ function getPathObject(ob, path, ltOb, fn) {
 		for (; ob && i < l; i++) {
 			prevOb = ob;
 			ob = tokens[i] ? ob[tokens[i]] : ob;
+			if ($isFunction(ob)) {
+				ob = ob.call(prevOb);
+			}
 		}
 	}
 	if (ltOb) {
@@ -12386,6 +12391,9 @@ function compileViewModel(name, type) {
 			iterate(data, function(ob, viewModel) {
 				if (viewModel) { // Iterate to build getters arg array (value, or mapped value)
 					ob = viewModel.map(ob);
+				} else if (typeof ob === STRING && (ob[0] === "{" && ob[ob.length-1] === "}" || ob[0] === "[" && ob[ob.length-1] === "]")){
+					// If it is a string with the start/end char: {/}, or [/], then assume it is a JSON expression
+					ob = JSON.parse(ob);
 				}
 				arr.push(ob);
 			});
@@ -12464,6 +12472,10 @@ function compileViewModel(name, type) {
 			if (viewModel) {
 				model[getter]().merge(ob, model, parentRef); // Update typed property
 			} else if (model[getter]() !== ob) {
+				if (typeof ob === STRING && (ob[0] === "{" && ob[ob.length-1] === "}" || ob[0] === "[" && ob[ob.length-1] === "]")){
+					// If it is a string with the start/end char: {/}, or [/], then assume it is a JSON expression
+					ob = JSON.parse(ob);
+				}
 				model[getter](ob); // Update non-typed property
 			}
 		});
@@ -13157,7 +13169,7 @@ function tmplFn(markup, tmpl, isLinkExpr, convertBack, hasElse) {
 //		result = markup;
 	if (isLinkExpr) {
 		if (convertBack !== undefined) {
-			markup = markup.slice(0, -convertBack.length - 2) + delimCloseChar0;
+			markup = markup.slice(0, -convertBack.length - 2) + delimCloseChar0;  // "{:myExpr:myCvt}" => "{:myExpr}"
 		}
 		markup = delimOpenChar0 + markup + delimCloseChar1;
 	}
@@ -13328,6 +13340,9 @@ function parseParams(params, pathBindings, tmpl, isLinkExpr) {
 							theOb = theOb.sb;
 						}
 						newOb = theOb.sb = {path: theOb.sb, bnd: theOb.bnd};
+						if (!newOb.path && theOb.path) {
+							theOb.bnd = true;
+						}
 					} else {
 						binds.push(newOb = {path: binds.pop()}); // Insert exprOb object, to be used during binding to return the computed object
 					}
@@ -13887,7 +13902,6 @@ if (!$.link) {
 
 	//BROWSER-SPECIFIC CODE
 	if ($) {
-
 		////////////////////////////////////////////////////////////////////////////////////////////////
 		// jQuery (= $) is loaded
 
@@ -13905,41 +13919,12 @@ if (!$.link) {
 	} else {
 		////////////////////////////////////////////////////////////////////////////////////////////////
 		// jQuery is not loaded.
-
-		$ = {};
-
-		if (setGlobals) {
-			global.jsrender = $; // We are loading jsrender.js from a script element, not AMD or CommonJS, so set global
-		}
-
-		// Error warning if jsrender.js is used as template engine on Node.js (e.g. Express or Hapi...)
-		// Use jsrender-node.js instead...
-		$.renderFile = $.__express = $.compile = function() { throw "Node.js: use npm jsrender, or jsrender-node.js"; };
-
-		//END BROWSER-SPECIFIC CODE
-		$.isFunction = function(ob) {
-			return typeof ob === "function";
-		};
-
-		$.isArray = Array.isArray || function(obj) {
-			return ({}.toString).call(obj) === "[object Array]";
-		};
-
-		$sub._jq = function(jq) { // private method to move from JsRender APIs from jsrender namespace to jQuery namespace
-			if (jq !== $) {
-				$extend(jq, $); // map over from jsrender namespace to jQuery namespace
-				$ = jq;
-				$.fn.render = $fnRender;
-				delete $.jsrender;
-				$expando = $.expando;
-			}
-		};
-
-		$.jsrender = versionNumber;
+		throw "jsviews.js requires jQuery";
 	}
+	//END OF BROWSER-SPECIFIC CODE
+
 	$subSettings = $sub.settings;
 	$subSettings.allowCode = false;
-	$isFunction = $.isFunction;
 	$.render = $render;
 	$.views = $views;
 	$.templates = $templates = $views.templates;
@@ -14092,7 +14077,6 @@ if (!$.link) {
 }
 //========================== Define default delimiters ==========================
 $subSettings = $sub.settings;
-$isArray = ($||jsr).isArray;
 $viewsSettings.delimiters("{{", "}}", "^");
 
 if (jsrToJq) { // Moving from jsrender namespace to jQuery namepace - copy over the stored items (templates, converters, helpers...)
@@ -14102,7 +14086,7 @@ if (jsrToJq) { // Moving from jsrender namespace to jQuery namepace - copy over 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< JsObservable >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 /* JsObservable:
  * See https://www.jsviews.com/#jsobservable and http://github.com/borismoore/jsviews
- * Copyright 2024, Boris Moore
+ * Copyright 2025, Boris Moore
  * Released under the MIT License.
  */
 
@@ -14110,8 +14094,6 @@ if (jsrToJq) { // Moving from jsrender namespace to jQuery namepace - copy over 
 
 $views = $.views;
 $sub = $views.sub;
-$isFunction = $.isFunction;
-$isArray = $.isArray;
 $expando = $.expando;
 if (!$.observe) {
 
@@ -14270,7 +14252,7 @@ if (!$.observe) {
 
 		function filterAndObserveAll(obj, prop, unobs, nestedArray) {
 			var newObject, newParentObs;
-			if ((+prop === prop || prop !== $expando) && (newObject = $observable._fltr(newAllPath, obj[prop], nextParentObs, filter))) {
+			if (prop !== $expando && (newObject = $observable._fltr(newAllPath, obj[prop], nextParentObs, filter))) {
 				newParentObs = nextParentObs.slice();
 				if (nestedArray && updatedTgt && newParentObs[0] !== updatedTgt) {
 					newParentObs.unshift(updatedTgt); // For array change events when observing an array which is not the root, need to add updated array to parentObs
@@ -14417,7 +14399,7 @@ if (!$.observe) {
 						data = events[el] && events[el].data;
 						if (data && (off && data.ns !== initialNs
 							// When observing, don't unbind dups unless they have the same namespace
-							|| !off && data.ns === initialNs && data.cb && data.cb._cId === cb._cId && (!cb._wrp || data.cb._wrp)))
+							|| !off && data.ns === initialNs && data.cb && data.cb._cId === cb._cId && data.cb._inId === cb._inId && (!cb._wrp || data.cb._wrp)))
 							// When observing and doing array binding, don't bind dups if they have the same namespace (Dups can happen e.g. with {^{for people ^~foo=people}})
 						{
 							return;
@@ -14478,11 +14460,14 @@ if (!$.observe) {
 						object = arr[relPath];
 						allPath = allPath ? allPath + "." + relPath : allPath;
 					}
-					if (filter && object) {
-						object = $observable._fltr(allPath, object, relPath ? [arr].concat(parentObs) : parentObs, filter);
-					}
-					if (object && (isArray || $isArray(object))) {
-						observeOnOff(cb, object, undefined, arrayChangeStr + ".observe" + getCbKey(cb), undefined, true, unbind);
+
+					if (isArray || $isArray(object)) {
+						if (filter && object) {
+							object = $observable._fltr(allPath, object, parentObs, filter);
+						}
+						if (object) {
+							observeOnOff(cb, object, undefined, arrayChangeStr + ".observe" + getCbKey(cb), undefined, true, unbind);
+						}
 					}
 					allPath = prevAllPath;
 				}
@@ -14543,6 +14528,7 @@ if (!$.observe) {
 						if (callback) {
 							obArrAddRemove._cId = getCbKey(callback); // Identify wrapped callback with unwrapped callback, so unobserveAll will
 																				// remove previous observeAll wrapped callback, if inner callback was the same;
+							obArrAddRemove._inId = ".arIn" + observeInnerCbKey++; // Specific _inId for each distinct obArrAddRemove, so not skipped as dups
 						}
 
 						var arrIndex, skip, dep, obArr, prt, fnProp, isGet,
@@ -14551,7 +14537,7 @@ if (!$.observe) {
 							return observeObjectPaths(object[0], [object[1]], callback, contextCb);
 						}
 
-						while ((prop = prts.shift()) !== undefined) {
+						while ((prop = prts.shift()) !== undefined && prop !== "__proto__") { // Prevent prototype pollution attacks
 							if (obj && typeof obj === OBJECT && typeof prop === STRING) {
 								if (prop === "") {
 									continue;
@@ -14583,7 +14569,8 @@ if (!$.observe) {
 										}
 										if (skip) {
 											// Duplicate binding(s) found, so move on
-											obj = obj[prop];
+											fnProp = obj[prop];
+											obj = $isFunction(fnProp) ? fnProp.call(obj) : obj[prop];
 											continue;
 										}
 									}
@@ -14736,7 +14723,7 @@ if (!$.observe) {
 						} else if (!$isFunction(path) && path && path._cpfn) {
 							// Path is an exprOb returned by a computed property - helper/data function (compiled expr function).
 							// Get innerCb for updating the object
-							innerCb = unobserve ? path.cb : getInnerCb(path);
+							innerCb = unobserve ? path.cb || (path.cb = callback) : getInnerCb(path); // https://github.com/BorisMoore/jsviews/issues/463#issuecomment-2651496030
 							// innerCb._ctx = callback._ctx; Could pass context (e.g. linkCtx) for use in a depends = function() {} call, so depends is different for different linkCtx's
 							innerCb._cId = callback._cId;
 							// Set the same cbBindingsStore key as for callback, so when callback is disposed, disposal of innerCb happens too.
@@ -14783,7 +14770,7 @@ if (!$.observe) {
 				m = paths.length;
 
 			if (typeof lastArg === STRING) { // If last arg is a string then this observe call is part of an observeAll call,
-				allPath = lastArg;            // and the last three args are the parentObs array, the filter, and the allPath string.
+				allPath = lastArg;           // and the last three args are the filter, the parentObs array, and the allPath string.
 				parentObs = paths.pop();
 				filter = paths.pop();
 				lastArg = !!paths.pop(); // unobserve
@@ -14901,7 +14888,7 @@ if (!$.observe) {
 
 	$.observable = $observable;
 	$observable._fltr = function(path, object, parentObs, filter) {
-		if (filter && $isFunction(filter)
+		if (filter && $isFunction(filter) && (typeof object === OBJECT || $isFunction(object))
 			? filter(path, object, parentObs)
 			: true // TODO Consider supporting filter being a string or strings to do RegEx filtering based on key and/or path
 		) {
@@ -14965,7 +14952,8 @@ if (!$.observe) {
 					// Simple single property case.
 					parts = path.split(/[.^]/);
 					while (object && parts.length > 1) {
-						object = object[parts.shift()];
+						key = parts.shift();
+						object = key !== "__proto__" ? object[key] : undefined; // Avoid prototype pollution
 					}
 					if (object) {
 						self._setProperty(object, parts[0], value, nonStrict, isCpfn);
@@ -15391,7 +15379,7 @@ if (!$.observe) {
 /* JsViews:
  * Interactive data-driven views using templates and data-linking.
  * See https://www.jsviews.com/#jsviews and http://github.com/BorisMoore/jsviews
- * Copyright 2024, Boris Moore
+ * Copyright 2025, Boris Moore
  * Released under the MIT License.
  */
 
@@ -15411,7 +15399,6 @@ if ($.link) { return $; } // JsViews is already loaded
 $subSettings.trigger = true;
 
 var activeBody, rTagDatalink, $view, $viewsLinkAttr, linkViewsSel, wrapMap, viewStore, oldAdvSet, useInput,
-	isIE = window.navigator.userAgent,
 	TEXTCONTENT = document.textContent !== undefined ? "textContent" : "innerText",
 	jsvAttrStr = "data-jsv",
 	elementChangeStr = "change.jsv",
@@ -15427,6 +15414,7 @@ var activeBody, rTagDatalink, $view, $viewsLinkAttr, linkViewsSel, wrapMap, view
 	VALUE = "value",
 	SCRIPT = "SCRIPT",
 	TRUE = "true",
+	PLAIN = "plaintext-only",
 	closeScript = '"></script>',
 	openScript = '<script type="jsv',
 	deferAttr = jsvAttrStr + "-df",
@@ -15466,7 +15454,6 @@ var activeBody, rTagDatalink, $view, $viewsLinkAttr, linkViewsSel, wrapMap, view
 	$inArray = $.inArray;
 
 RADIOINPUT += RADIO + "]"; // input[type=radio]
-isIE = isIE.indexOf('MSIE ')>0 || isIE.indexOf('Trident/')>0;
 
 $observable = $.observable;
 
@@ -15491,7 +15478,7 @@ function updateValues(sourceValues, tagElse, async, bindId, ev) {
 // Observably update a data value targeted by the binding.to binding of a 2way data-link binding. Called when elem changes
 // Called when linkedElem of a tag control changes: as updateValue(val, index, tagElse, bindId, ev) - this: undefined
 // Called directly as tag.updateValues(val1, val2, val3, ...) - this: tag
-	var linkCtx, cvtBack, cnvtName, target, view, binding, sourceValue, origVals, sourceElem, sourceEl,
+	var linkCtx, cvtBack, cnvtName, target, view, binding, sourceValue, origVals, sourceElem, sourceEl, linkedElem, linkedElems,
 		tos, to, tcpTag, exprOb, contextCb, l, m, tag, vals, ind;
 
 	if (bindId && bindId._tgId) {
@@ -15537,12 +15524,28 @@ function updateValues(sourceValues, tagElse, async, bindId, ev) {
 			sourceElem._jsvSel = sourceValues;
 		} else if (sourceElem._jsvSel) {
 			// Checkbox group (possibly using {{checkboxgroup}} tag) data-linking to array of strings
-			vals = sourceElem._jsvSel.slice();
-			ind = $inArray(sourceElem.value, vals);
-			if (ind > -1 && !sourceElem.checked) {
-				vals.splice(ind, 1); // Unchecking this checkbox
-			} else if (ind < 0 && sourceElem.checked) {
-				vals.push(sourceElem.value); // Checking this checkbox
+			tag = sourceElem._jsvLkEl;
+			if (tag && tag.tagCtx.params.props.linkTo) {
+				// checkboxgroup tag with linkTo property - binds to linkTo data
+				linkedElems = tag.linkedElem;
+				l = linkedElems.length;
+				vals = [];
+
+				while (l--) {
+					linkedElem = linkedElems[l];
+					if (linkedElem.checked) {
+						vals.unshift(linkedElem.value); // to follow same order as checkboxes
+					}
+				}
+			} else {
+				// checkboxgroup tag with no linkTo property - binds to source data
+				vals = sourceElem._jsvSel.slice();
+				ind = $inArray(sourceElem.value, vals);
+				if (ind > -1 && !sourceElem.checked) {
+					vals.splice(ind, 1); // Unchecking this checkbox
+				} else if (ind < 0 && sourceElem.checked) {
+					vals.push(sourceElem.value); // Checking this checkbox
+				}
 			}
 			sourceValues = [vals];
 		}
@@ -15848,6 +15851,11 @@ function updateContent(sourceValue, linkCtx, attr, tag) {
 			attr = attr.slice(5);
 		} else if (attr === CHECKED) {
 			useProp = true;
+
+			if (target.name && sourceValue == undefined &&
+				target._jsvLkEl && target._jsvLkEl.tagName === "checkboxgroup") {
+				sourceValue = []; // If checkboxgroup bound to non-initialized array, we initialize as empty array.
+			}
 			if (target.name && $isArray(sourceValue)) {
 				target._jsvSel = sourceValue; // Checkbox group (possibly using {{checkboxgroup}} tag) data-linking to array of strings
 				sourceValue = $inArray(target.value, sourceValue) > -1;
@@ -15869,7 +15877,7 @@ function updateContent(sourceValue, linkCtx, attr, tag) {
 			sourceValue = target.value === sourceValue;
 			// If the data value corresponds to the value attribute of this radio button input, set the checked property to true
 			// Otherwise set the checked property to false
-		} else if (attr === "selected" || attr === "disabled" || attr === "multiple" || attr === "readonly") {
+		} else if (attr === "selected" || attr === "disabled" || attr === "multiple" || attr === "readonly" || attr === "required") {
 			sourceValue = (sourceValue && sourceValue !== "false") ? attr : null;
 			// Use attr, not prop, so when the options (for example) are changed dynamically, but include the previously selected value,
 			// they will still be selected after the change
@@ -15922,7 +15930,7 @@ function updateContent(sourceValue, linkCtx, attr, tag) {
 					// Insert and link new content
 					late = view.link(view.data, target, prevNode, nextNode, sourceValue, tag && {tag: tag._tgId});
 				} else {
-					// data-linked value targeting innerHTML: data-link="html{:expr}" or contenteditable="true"
+					// data-linked value targeting innerHTML: data-link="html{:expr}" or is contenteditable
 					renders = renders && targetVal !== sourceValue;
 					if (renders) {
 						$target.empty();
@@ -16039,7 +16047,7 @@ function defaultAttr(elem, to, linkGetVal) {
 	var nodeName = elem.nodeName.toLowerCase(),
 		attr =
 			$subSettingsAdvanced._fe[nodeName] // get form element binding settings for input textarea select or optgroup
-			|| elem.contentEditable === TRUE && {to: HTML, from: HTML}; // Or if contentEditable set to "true" set attr to "html"
+			|| (elem.contentEditable === TRUE || elem.contentEditable === PLAIN) && { to: HTML, from: HTML }; // Or if is contentEditable set attr to "html"
 	return attr
 		? (to
 			? ((nodeName === "input" && elem.type === RADIO) // For radio buttons, bind from value, but bind to 'radio' - special value.
@@ -16905,7 +16913,7 @@ function viewLink(outerData, parentNode, prevNode, nextNode, html, refresh, cont
 		: (self.parentElem    // view.link()
 			|| document.body);  // link(null, data) to link the whole document
 
-	validate = !$subSettingsAdvanced.noValidate && parentNode.contentEditable !== TRUE;
+	validate = !$subSettingsAdvanced.noValidate;
 	parentTag = parentNode.tagName.toLowerCase();
 	elCnt = !!elContent[parentTag];
 
@@ -17057,12 +17065,12 @@ function addDataBinding(late, linkMarkup, node, currentView, boundTagId, isLink,
 			if (tokens[6]) {
 				convertBack = tokens[10] || undefined;
 				linkCtx.convert = tokens[5] || "";
-				if (convertBack !== undefined && defaultAttr(node)) {
-					if (attr) {
+				if (convertBack !== undefined) {
+					if (attr) { // attr is the target, such as disabled{:linkExpr}. Always a from binding, never a to binding
 						syntaxError(tagExpr + "- Remove target: " + attr);
 					}
-					// Default target, so allow 2 way binding
-					linkCtx.convertBack = convertBack = convertBack.slice(1);
+					// No attr, so default target, so allow 2 way binding
+					linkCtx.convertBack = convertBack = convertBack.slice(1);  // ":myCvt" => "myCvt"
 				}
 			}
 			// Compile the linkFn expression which evaluates and binds a data-link expression
@@ -17419,7 +17427,7 @@ function asyncOnElemChange(ev) {
 
 function bindTriggerEvent($elem, trig, onoff) {
 	// Bind keydown, or other trigger - (rather than use the default change event bubbled to activeBody)
-	if (trig === true && useInput && (!isIE || $elem[0].contentEditable !== TRUE)) { // IE oninput event is not raised for contenteditable changes
+	if (trig === true && useInput) {
 		$elem[onoff]("input.jsv", onElemChange); // For HTML5 browser with "oninput" support - for mouse editing of text
 	} else {
 		trig = typeof trig === STRING ? trig : "keydown.jsv"; // Set trigger to (true || truey non-string (e.g. 1) || 'keydown')
@@ -17445,7 +17453,7 @@ function bindLinkedElChange(tag, linkedElem) {
 	}
 	// Trigger is noop except for text box, textarea, contenteditable...
 	newTrig = newTrig && (linkedElem.tagName === "INPUT" && linkedElem.type !== CHECKBOX && linkedElem.type !== RADIO
-		|| linkedElem.type === "textarea" || linkedElem.contentEditable === TRUE) && newTrig || false;
+		|| linkedElem.type === "textarea" || linkedElem.contentEditable === TRUE || linkedElem.contentEditable === PLAIN) && newTrig || false;
 
 	if (oldTrig !== newTrig) {
 		$linkedElem = $(linkedElem);
@@ -17481,7 +17489,7 @@ function defineBindToDataTargets(binding, tag, cvtBk) {
 			if (targetPaths = targetPathsElses[tagElse]) {
 				bindTo = targetPaths._jsvto ? ["jsvto"] : (bindTo || [0]);
 				if (!tagElse && tag && tag._.ths) {
-					// Tag has a this=expr bindign for which we will create an additional 'to' target (at index bindTo.length)
+					// Tag has a this=expr binding for which we will create an additional 'to' target (at index bindTo.length)
 					bindTo = bindTo.concat("this");
 				}
 				k = bindTo.length;
@@ -18111,7 +18119,7 @@ function addLinkMethods(tagOrView) { // tagOrView is View prototype or tag insta
 											$(linkedEl).val(val); // Use jQuery for attrHooks - can't just set value (on select, for example)
 										}
 									} else {
-										linkedEl[linkedEl.contentEditable === TRUE ? "innerHTML" : TEXTCONTENT] = val;
+										linkedEl[linkedEl.contentEditable === TRUE || linkedEl.contentEditable === PLAIN ? "innerHTML" : TEXTCONTENT] = val;
 									}
 								}
 								if (tagCtx.props.name) {
@@ -18620,7 +18628,7 @@ $tags({
 				// Configure the name for each radio input element
 				$linkedElem[l].name = $linkedElem[l].name || tag.name;
 			}
-			// Data-link each checkbox input element using the checkboxgroup data-link expression
+			// Data-link each radio input element using the radiogroup data-link expression
 			for (l in propParams) {
 				linkExpr += " " + l + "=" + propParams[l];
 			}
@@ -18628,7 +18636,7 @@ $tags({
 			tag.linkedElem = $linkedElem;
 
 			// This onDomChange method is called by nested tags such as {^{for}} or {^{if}}, when DOM contents are changed
-			tag.onDomChange = function(forOrIfTagCtx, linkCtx, eventArgs, ev) {
+			tag.onDomChange = function() {
 				var linkedElem, l,
 					val = tag.cvtArgs()[0];
 
@@ -18647,7 +18655,7 @@ $tags({
 						if (useDisable) {
 							linkedElem.disabled = !!tagCtx.props.disabled;
 						}
-						$.link(linkExpr, linkedElem, linkCtx.data);
+						$.link(linkExpr, linkedElem, linkCtx.data, undefined, undefined, linkCtx.view);
 					}
 				}
 			};
@@ -18699,10 +18707,11 @@ $tags({
 			tag.linkedElem = $linkedElem;
 
 			// This onDomChange method is called by nested tags such as {^{for}} or {^{if}}, when DOM contents are changed
-			tag.onDomChange = function(forOrIfTagCtx, linkCtx, eventArgs, ev) {
+			tag.onDomChange = function() {
 				var linkedElem,
 					$linkedElem = tag.contents(true, CHECKBOXINPUT, filter), // Obtain updated (possibly filtered) list
 					l = $linkedElem.length;
+				tag.linkedElem = $linkedElem;
 				// Contents may have changed so recreate $linkedElem for any additional checkbox input elements
 				while (l--) {
 					// Configure binding and name for each checkbox input element
@@ -18713,7 +18722,8 @@ $tags({
 					if (!linkedElem._jsvSel) {
 						// This is a new inserted checkbox, so we will data-link it based on the checkboxgroup binding
 						linkedElem.name = linkedElem.name || tag.name;
-						$.link(linkExpr, linkedElem, linkCtx.data);
+						linkedElem._jsvLkEl = tag;
+						$.link(linkExpr, linkedElem, linkCtx.data, undefined, undefined, linkCtx.view);
 					}
 				}
 			};

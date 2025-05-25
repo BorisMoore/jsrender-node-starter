@@ -1,6 +1,5 @@
 'use strict'
 // Rendering JsRender templates using Hapi https://hapi.dev/tutorials/views/
-
 // Use this file as start file, after installing Hapi: npm install --save @hapi/hapi
 
 var Hapi = require('@hapi/hapi');
